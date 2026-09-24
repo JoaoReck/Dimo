@@ -36,7 +36,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     '22:00',
   ];
 
-  // Helper to match activities to nearest hour slot or check if start time starts with that hour
   const getActivitiesForHour = (hourPrefix: string) => {
     const hourNumber = parseInt(hourPrefix.split(':')[0], 10);
     return activities.filter((act) => {
@@ -46,31 +45,31 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 pb-20">
-      <div className="p-4 sm:p-6 rounded-2xl bg-[#13161D] border border-[#252A33]">
-        <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#252A33] text-xs font-mono text-[#8B919E]">
+    <div className="w-full max-w-lg mx-auto px-3 sm:px-4 pb-20">
+      <div className="p-3.5 sm:p-5 rounded-2xl bg-[#13161D] border border-[#252A33]">
+        <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#252A33] text-xs font-mono text-[#8B919E]">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-emerald-400" />
-            <span className="text-white font-semibold">GRADE DIÁRIA // CRONOGRAMA</span>
+            <span className="text-white font-semibold">GRADE DIÁRIA</span>
           </div>
-          <span>SLOTS DE 60 MIN</span>
+          <span className="text-[11px]">SLOTS DE 60 MIN</span>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {hours.map((hour) => {
             const slotActivities = getActivitiesForHour(hour);
 
             return (
-              <div key={hour} className="flex items-start gap-4 group">
+              <div key={hour} className="flex items-start gap-2.5 sm:gap-3 group">
                 {/* Time column */}
-                <div className="w-14 sm:w-16 shrink-0 pt-1 text-xs font-mono text-[#8B919E] group-hover:text-white transition-colors">
+                <div className="w-12 sm:w-14 shrink-0 pt-1 text-xs font-mono text-[#8B919E] group-hover:text-white transition-colors">
                   {hour}
                 </div>
 
                 {/* Content / Slots */}
-                <div className="flex-1 min-h-[44px] pb-3 border-b border-[#252A33]/50">
+                <div className="flex-1 min-h-[40px] pb-2 border-b border-[#252A33]/40 min-w-0">
                   {slotActivities.length > 0 ? (
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       {slotActivities.map((act) => {
                         const isCompleted = act.completed;
                         const isNext = act.id === nextActivityId && !isCompleted;
@@ -80,7 +79,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                             key={act.id}
                             layout
                             onClick={() => onOpenDetail(act)}
-                            className={`p-3 rounded-lg border transition-all cursor-pointer flex items-center justify-between ${
+                            className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2 ${
                               isNext
                                 ? 'bg-[#181C26] border-emerald-500/80 shadow-[0_0_15px_rgba(34,197,94,0.15)]'
                                 : isCompleted
@@ -88,13 +87,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                                 : 'bg-[#181C26]/70 border-[#252A33] hover:border-[#3B4252]'
                             }`}
                           >
-                            <div className="flex items-center gap-3 min-w-0">
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   onToggleComplete(act.id);
                                 }}
-                                className={`w-5 h-5 rounded flex items-center justify-center transition-all ${
+                                className={`w-5 h-5 rounded-md flex items-center justify-center transition-all shrink-0 cursor-pointer ${
                                   isCompleted
                                     ? 'bg-emerald-500 text-black'
                                     : isNext
@@ -105,13 +104,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                                 {isCompleted && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                               </button>
 
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-mono text-xs text-emerald-400 font-semibold">
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <span className="font-mono text-xs text-emerald-400 font-semibold shrink-0">
                                     {act.startTime}
                                   </span>
                                   <span
-                                    className={`text-sm font-medium truncate ${
+                                    className={`text-xs sm:text-sm font-medium truncate ${
                                       isCompleted
                                         ? 'line-through text-[#6F7684]'
                                         : 'text-white'
@@ -120,33 +119,23 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                                     {act.title}
                                   </span>
                                 </div>
-                                {act.description && (
-                                  <p className="text-xs text-[#8B919E] truncate mt-0.5 max-w-md">
-                                    {act.description}
-                                  </p>
-                                )}
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2 shrink-0 ml-2">
+                            <div className="flex items-center gap-1.5 shrink-0">
                               {isNext && (
-                                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                                  EM ANDAMENTO
+                                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                  PRÓXIMO
                                 </span>
                               )}
-                              {act.duration && (
-                                <span className="text-[11px] font-mono text-[#8B919E] hidden sm:inline">
-                                  {act.duration}
-                                </span>
-                              )}
-                              <ChevronRight className="w-4 h-4 text-[#6F7684]" />
+                              <ChevronRight className="w-3.5 h-3.5 text-[#6F7684]" />
                             </div>
                           </motion.div>
                         );
                       })}
                     </div>
                   ) : (
-                    <div className="h-4 border-l border-dashed border-[#252A33] ml-2" />
+                    <div className="h-3 border-l border-dashed border-[#252A33] ml-1.5" />
                   )}
                 </div>
               </div>

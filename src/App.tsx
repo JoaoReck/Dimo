@@ -257,7 +257,7 @@ export default function App() {
   }, [nextActivity, isFormOpen, selectedActivity, handleToggleComplete]);
 
   return (
-    <div className="min-h-screen bg-[#0B0D12] text-[#F5F5F5] flex flex-col font-sans selection:bg-emerald-500/20 selection:text-emerald-400">
+    <div className="w-full max-w-full overflow-x-hidden min-h-screen bg-[#0B0D12] text-[#F5F5F5] flex flex-col font-sans selection:bg-emerald-500/20 selection:text-emerald-400">
       {/* Top Header */}
       <Header
         currentView={currentView}
@@ -275,7 +275,7 @@ export default function App() {
       />
 
       {/* Main Container */}
-      <main className="flex-1 pb-16">
+      <main className="w-full max-w-full overflow-x-hidden flex-1 pb-20">
         {/* Day Selector & Overall Progress */}
         <DaySelector
           currentOffset={currentOffset}

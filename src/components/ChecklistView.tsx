@@ -1,6 +1,6 @@
 import React from 'react';
 import { Activity } from '../types';
-import { Check, Square, ChevronRight } from 'lucide-react';
+import { Check, ChevronRight } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface ChecklistViewProps {
@@ -18,8 +18,8 @@ export const ChecklistView: React.FC<ChecklistViewProps> = ({
 }) => {
   if (activities.length === 0) {
     return (
-      <div className="w-full max-w-3xl mx-auto px-4 py-16 text-center">
-        <div className="p-8 rounded-xl border border-dashed border-[#252A33] bg-[#13161D]/50 text-[#8B919E] font-mono text-sm">
+      <div className="w-full max-w-lg mx-auto px-4 py-16 text-center">
+        <div className="p-8 rounded-2xl border border-dashed border-[#252A33] bg-[#13161D]/50 text-[#8B919E] font-mono text-sm">
           Nenhuma atividade no checklist para esta jornada.
         </div>
       </div>
@@ -27,8 +27,8 @@ export const ChecklistView: React.FC<ChecklistViewProps> = ({
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 pb-20">
-      <div className="mb-4 flex items-center justify-between text-xs font-mono text-[#8B919E] px-2">
+    <div className="w-full max-w-lg mx-auto px-3 sm:px-4 pb-20">
+      <div className="mb-3 flex items-center justify-between text-[11px] font-mono text-[#8B919E] px-1">
         <span>ESTADO & HORÁRIO</span>
         <span>ATIVIDADE // DETALHES</span>
       </div>
@@ -42,23 +42,23 @@ export const ChecklistView: React.FC<ChecklistViewProps> = ({
             <motion.div
               key={activity.id}
               layout
-              className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl border transition-all duration-200 cursor-pointer ${
+              className={`flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 cursor-pointer ${
                 isNext
                   ? 'bg-[#13161D] border-emerald-500/70 shadow-[0_0_20px_rgba(34,197,94,0.12)]'
                   : isCompleted
-                  ? 'bg-[#13161D]/70 border-[#252A33] hover:border-[#3B4252]'
+                  ? 'bg-[#13161D]/60 border-[#252A33] hover:border-[#3B4252]'
                   : 'bg-[#13161D]/40 border-[#252A33] hover:border-[#3B4252]'
               }`}
               onClick={() => onOpenDetail(activity)}
             >
               {/* Left: Checkbox & Info */}
-              <div className="flex items-center gap-3.5 min-w-0">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onToggleComplete(activity.id);
                   }}
-                  className={`w-6 h-6 rounded flex items-center justify-center transition-all ${
+                  className={`w-6 h-6 rounded-md flex items-center justify-center transition-all shrink-0 cursor-pointer ${
                     isCompleted
                       ? 'bg-emerald-500 text-[#0B0D12] shadow-[0_0_10px_rgba(34,197,94,0.5)]'
                       : isNext
@@ -69,17 +69,17 @@ export const ChecklistView: React.FC<ChecklistViewProps> = ({
                 >
                   {isCompleted && <Check className="w-4 h-4 stroke-[3]" />}
                   {isNext && !isCompleted && (
-                    <span className="w-2 h-2 rounded-sm bg-emerald-400 animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   )}
                 </button>
 
-                <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
                   <span
-                    className={`font-mono text-xs font-semibold ${
+                    className={`font-mono text-xs font-semibold shrink-0 ${
                       isNext
                         ? 'text-emerald-400'
                         : isCompleted
-                        ? 'text-[#8B919E]'
+                        ? 'text-emerald-500/70'
                         : 'text-[#8B919E]'
                     }`}
                   >
@@ -87,29 +87,29 @@ export const ChecklistView: React.FC<ChecklistViewProps> = ({
                   </span>
 
                   <span
-                    className={`text-sm sm:text-base font-medium truncate ${
+                    className={`text-sm font-medium truncate ${
                       isCompleted
                         ? 'line-through text-[#6F7684]'
                         : isNext
                         ? 'text-white font-semibold'
-                        : 'text-[#E0E0E0]'
+                        : 'text-[#D0D4DC]'
                     }`}
                   >
                     {activity.title}
                   </span>
 
                   {isNext && (
-                    <span className="hidden sm:inline-block text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                    <span className="hidden xs:inline-block text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shrink-0">
                       PRÓXIMO
                     </span>
                   )}
                 </div>
               </div>
 
-              {/* Right: Category & arrow */}
-              <div className="flex items-center gap-3 shrink-0 ml-3">
+              {/* Right: Duration & arrow */}
+              <div className="flex items-center gap-2 shrink-0 ml-2">
                 {activity.duration && (
-                  <span className="text-xs font-mono text-[#8B919E] hidden md:inline">
+                  <span className="text-[11px] font-mono text-[#8B919E] hidden sm:inline">
                     {activity.duration}
                   </span>
                 )}
