@@ -39,11 +39,11 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                 className={`w-2.5 h-2.5 rounded-full ${
                   activity.completed
                     ? 'bg-emerald-500 shadow-[0_0_8px_#22C55E]'
-                    : 'bg-neutral-500'
+                    : 'bg-emerald-400 animate-pulse'
                 }`}
               />
               <span className="text-xs font-mono text-[#8B919E] tracking-wider uppercase">
-                DETALHE DA ETAPA
+                MOMENTO DA JORNADA // {dayInfo.shortLabel}
               </span>
             </div>
 
@@ -59,24 +59,29 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
           <div className="p-4 sm:p-5 space-y-4 overflow-y-auto">
             {/* Title & Status */}
             <div>
-              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <span
                   className={`text-[11px] font-mono px-2 py-0.5 rounded border ${
                     activity.completed
-                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 font-semibold'
                       : 'bg-[#181C26] text-[#8B919E] border-[#252A33]'
                   }`}
                 >
-                  {activity.completed ? '● CONCLUÍDA' : '○ PENDENTE'}
+                  {activity.completed ? '● CONCLUÍDA' : '○ EM ABERTO'}
                 </span>
                 {activity.category && (
                   <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-[#181C26] text-[#8B919E] border border-[#252A33]">
                     {activity.category}
                   </span>
                 )}
+                {activity.duration && (
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-[#0B0D12] text-emerald-400 border border-[#252A33]">
+                    {activity.duration}
+                  </span>
+                )}
               </div>
 
-              <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight break-words">
+              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight uppercase break-words">
                 {activity.title}
               </h2>
             </div>
