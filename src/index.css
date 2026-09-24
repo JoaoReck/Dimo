@@ -12,12 +12,35 @@
     --accent: #22C55E;
   }
 
+  html {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     background-color: var(--bg-main);
     color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
+    width: 100%;
+    max-width: 100vw;
     overflow-x: hidden;
+    overscroll-behavior-x: none;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #root {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
   }
 
   /* Custom scrollbar */
@@ -56,4 +79,3 @@
 .glow-active {
   animation: subtle-pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
-
