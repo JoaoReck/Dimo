@@ -1,12 +1,13 @@
 import React from 'react';
 import { Activity } from '../types';
-import { Check, Clock, ChevronRight } from 'lucide-react';
+import { Check, Clock, ChevronRight, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface CalendarViewProps {
   activities: Activity[];
   onToggleComplete: (id: string, e?: React.MouseEvent) => void;
   onOpenDetail: (activity: Activity) => void;
+  onNewActivity?: (time?: string) => void;
   nextActivityId?: string;
 }
 
@@ -14,6 +15,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   activities,
   onToggleComplete,
   onOpenDetail,
+  onNewActivity,
   nextActivityId,
 }) => {
   // Common time markers for a day
@@ -52,7 +54,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             <Clock className="w-4 h-4 text-emerald-400" />
             <span className="text-white font-semibold">GRADE DIÁRIA</span>
           </div>
-          <span className="text-[11px]">SLOTS DE 60 MIN</span>
+          <span className="text-[11px]">TOQUE NO HORÁRIO PARA AGENDAR</span>
         </div>
 
         <div className="space-y-3">
@@ -62,9 +64,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             return (
               <div key={hour} className="flex items-start gap-2.5 sm:gap-3 group">
                 {/* Time column */}
-                <div className="w-12 sm:w-14 shrink-0 pt-1 text-xs font-mono text-[#8B919E] group-hover:text-white transition-colors">
+                <button
+                  type="button"
+                  onClick={() => onNewActivity && onNewActivity(hour)}
+                  className="w-12 sm:w-14 shrink-0 pt-1 text-xs font-mono text-[#8B919E] group-hover:text-emerald-400 transition-colors text-left cursor-pointer"
+                  title={`Criar atividade às ${hour}`}
+                >
                   {hour}
-                </div>
+                </button>
 
                 {/* Content / Slots */}
                 <div className="flex-1 min-h-[40px] pb-2 border-b border-[#252A33]/40 min-w-0">
@@ -135,7 +142,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                       })}
                     </div>
                   ) : (
-                    <div className="h-3 border-l border-dashed border-[#252A33] ml-1.5" />
+                    <button
+                      onClick={() => onNewActivity && onNewActivity(hour)}
+                      className="w-full text-left py-1 text-[11px] font-mono text-[#6A7280]/40 group-hover:text-emerald-400/80 transition-colors flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Plus className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <span className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        + Adicionar atividade às {hour}
+                      </span>
+                    </button>
                   )}
                 </div>
               </div>

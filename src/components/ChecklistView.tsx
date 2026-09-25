@@ -1,12 +1,13 @@
 import React from 'react';
 import { Activity } from '../types';
-import { Check, ChevronRight } from 'lucide-react';
+import { Check, ChevronRight, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface ChecklistViewProps {
   activities: Activity[];
   onToggleComplete: (id: string, e?: React.MouseEvent) => void;
   onOpenDetail: (activity: Activity) => void;
+  onNewActivity?: () => void;
   nextActivityId?: string;
 }
 
@@ -14,13 +15,24 @@ export const ChecklistView: React.FC<ChecklistViewProps> = ({
   activities,
   onToggleComplete,
   onOpenDetail,
+  onNewActivity,
   nextActivityId,
 }) => {
   if (activities.length === 0) {
     return (
       <div className="w-full max-w-lg mx-auto px-4 py-16 text-center">
-        <div className="p-8 rounded-2xl border border-dashed border-[#252A33] bg-[#13161D]/50 text-[#8B919E] font-mono text-sm">
-          Nenhuma atividade no checklist para esta jornada.
+        <div className="p-8 rounded-2xl border border-dashed border-[#252A33] bg-[#13161D]/50 text-[#8B919E] font-mono text-sm flex flex-col items-center">
+          <p className="mb-2">Nenhuma atividade no checklist para esta jornada.</p>
+          <p className="text-xs text-neutral-500 mb-4">Adicione uma atividade para começar o seu dia.</p>
+          {onNewActivity && (
+            <button
+              onClick={onNewActivity}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-mono font-bold text-xs tracking-wider transition-all shadow-[0_0_15px_rgba(34,197,94,0.3)] cursor-pointer"
+            >
+              <Plus className="w-4 h-4 stroke-[3]" />
+              <span>+ NOVA ATIVIDADE</span>
+            </button>
+          )}
         </div>
       </div>
     );

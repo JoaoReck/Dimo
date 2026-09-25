@@ -15,6 +15,8 @@ interface ActivityFormModalProps {
     category?: string;
   }) => void;
   initialActivity?: Activity | null;
+  initialTitle?: string;
+  defaultStartTime?: string;
   dayInfo: DayInfo;
 }
 
@@ -23,13 +25,15 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
   onClose,
   onSave,
   initialActivity,
+  initialTitle = '',
+  defaultStartTime,
   dayInfo,
 }) => {
   const [title, setTitle] = useState('');
-  const [startTime, setStartTime] = useState('14:00');
+  const [startTime, setStartTime] = useState('08:00');
   const [endTime, setEndTime] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('Geral');
+  const [category, setCategory] = useState('Rotina');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -38,16 +42,16 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
       setStartTime(initialActivity.startTime);
       setEndTime(initialActivity.endTime || '');
       setDescription(initialActivity.description || '');
-      setCategory(initialActivity.category || 'Geral');
+      setCategory(initialActivity.category || 'Rotina');
     } else {
-      setTitle('');
-      setStartTime('14:00');
+      setTitle(initialTitle || '');
+      setStartTime(defaultStartTime || '08:00');
       setEndTime('');
       setDescription('');
-      setCategory('Geral');
+      setCategory('Rotina');
     }
     setError('');
-  }, [initialActivity, isOpen]);
+  }, [initialActivity, initialTitle, defaultStartTime, isOpen]);
 
   if (!isOpen) return null;
 
@@ -127,8 +131,11 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
               <input
                 type="text"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ex: Treino de Força, Café, Estudar..."
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  if (error) setError('');
+                }}
+                placeholder="Ex: Café, Trabalho, Treino, Almoço, Estudar..."
                 className="w-full px-3 py-2 rounded-lg bg-[#0B0D12] border border-[#252A33] focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 text-white text-sm placeholder:text-neutral-600 outline-none transition-all"
                 autoFocus
               />

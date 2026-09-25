@@ -1,34 +1,29 @@
 import { Activity, DayOffset, DayInfo } from '../types';
+import { getDynamicDayInfo } from '../utils/storage';
 
-export const INITIAL_DAYS_INFO: Record<DayOffset, DayInfo> = {
-  [-1]: {
-    offset: -1,
-    dateKey: 'ontem',
-    label: 'ONTEM // QUARTA, 23 OUT',
-    shortLabel: 'Ontem',
-    dateFormatted: '23 de Outubro',
-  },
-  [0]: {
-    offset: 0,
-    dateKey: 'hoje',
-    label: 'HOJE // QUINTA, 24 OUT',
-    shortLabel: 'Hoje',
-    dateFormatted: '24 de Outubro',
-  },
-  [1]: {
-    offset: 1,
-    dateKey: 'amanha',
-    label: 'AMANHÃ // SEXTA, 25 OUT',
-    shortLabel: 'Amanhã',
-    dateFormatted: '25 de Outubro',
-  },
+export const getDayInfo = (offset: DayOffset): DayInfo => {
+  return getDynamicDayInfo(offset);
 };
 
+export const INITIAL_DAYS_INFO: Record<DayOffset, DayInfo> = {
+  [-1]: getDynamicDayInfo(-1),
+  [0]: getDynamicDayInfo(0),
+  [1]: getDynamicDayInfo(1),
+};
+
+// Initial default is 100% EMPTY - user creates real activities for their own day!
 export const INITIAL_ACTIVITIES_BY_DAY: Record<DayOffset, Activity[]> = {
+  [-1]: [],
+  [0]: [],
+  [1]: [],
+};
+
+// Optional sample routine available ONLY if the user explicitly wants to preview
+export const DEMO_SAMPLE_ACTIVITIES: Record<DayOffset, Activity[]> = {
   [-1]: [
     {
       id: 'ontem-1',
-      title: 'Café & Planejamento Estratégico',
+      title: 'Café',
       startTime: '08:00',
       endTime: '08:45',
       duration: '45 min',
@@ -39,7 +34,7 @@ export const INITIAL_ACTIVITIES_BY_DAY: Record<DayOffset, Activity[]> = {
     },
     {
       id: 'ontem-2',
-      title: 'Trabalho / Sprint de Implementação',
+      title: 'Trabalho',
       startTime: '09:00',
       endTime: '12:00',
       duration: '3h 00min',
@@ -50,7 +45,7 @@ export const INITIAL_ACTIVITIES_BY_DAY: Record<DayOffset, Activity[]> = {
     },
     {
       id: 'ontem-3',
-      title: 'Almoço & Caminhada Regenerativa',
+      title: 'Almoço',
       startTime: '12:00',
       endTime: '13:00',
       duration: '1h 00min',
@@ -61,7 +56,7 @@ export const INITIAL_ACTIVITIES_BY_DAY: Record<DayOffset, Activity[]> = {
     },
     {
       id: 'ontem-4',
-      title: 'Treino de Força & Mobilidade',
+      title: 'Treino',
       startTime: '18:30',
       endTime: '19:45',
       duration: '1h 15min',
@@ -72,7 +67,7 @@ export const INITIAL_ACTIVITIES_BY_DAY: Record<DayOffset, Activity[]> = {
     },
     {
       id: 'ontem-5',
-      title: 'Estudo: Design Systems & Tipografia',
+      title: 'Estudar',
       startTime: '20:00',
       endTime: '21:15',
       duration: '1h 15min',
@@ -85,50 +80,50 @@ export const INITIAL_ACTIVITIES_BY_DAY: Record<DayOffset, Activity[]> = {
 
   [0]: [
     {
-      id: 'hoje-1',
+      id: 'demo-1',
       title: 'Café',
       startTime: '08:00',
       endTime: '08:45',
       duration: '45 min',
       completed: true,
       completedAt: '08:44',
-      description: 'Preparo do café filtrado, hidratação e alinhamento das prioridades cognitivas do dia.',
+      description: 'Preparo do café filtrado, hidratação e alinhamento das prioridades cognitivas.',
       category: 'Rotina',
     },
     {
-      id: 'hoje-2',
+      id: 'demo-2',
       title: 'Trabalho',
       startTime: '09:00',
       endTime: '12:00',
       duration: '3h 00min',
       completed: true,
       completedAt: '11:50',
-      description: 'Sprint principal de foco profundo: arquitetura de software, resolução de problemas e implementação.',
+      description: 'Sprint principal de foco profundo: arquitetura de software e implementação.',
       category: 'Foco Profissional',
     },
     {
-      id: 'hoje-3',
+      id: 'demo-3',
       title: 'Almoço',
       startTime: '12:00',
       endTime: '13:00',
       duration: '1h 00min',
       completed: true,
       completedAt: '12:50',
-      description: 'Pausa nutritiva completa e desconexão das telas para recuperação física e cognitiva.',
+      description: 'Pausa nutritiva completa e desconexão das telas para recuperação.',
       category: 'Recuperação',
     },
     {
-      id: 'hoje-4',
+      id: 'demo-4',
       title: 'Treino',
       startTime: '18:30',
       endTime: '19:45',
       duration: '1h 15min',
       completed: false,
-      description: 'Treino funcional de força e resistência. Aceleração metabólica e liberação de endorfina.',
+      description: 'Treino funcional de força e resistência. Aceleração metabólica.',
       category: 'Saúde & Físico',
     },
     {
-      id: 'hoje-5',
+      id: 'demo-5',
       title: 'Estudar',
       startTime: '20:00',
       endTime: '21:15',
@@ -142,53 +137,23 @@ export const INITIAL_ACTIVITIES_BY_DAY: Record<DayOffset, Activity[]> = {
   [1]: [
     {
       id: 'amanha-1',
-      title: 'Café & Respiração Consciente',
+      title: 'Café',
       startTime: '08:00',
       endTime: '08:45',
       duration: '45 min',
       completed: false,
-      description: 'Rotina matinal, hidratação e definição das três prioridades absolutas do dia.',
+      description: 'Rotina matinal, hidratação e definição das prioridades do dia.',
       category: 'Rotina',
     },
     {
       id: 'amanha-2',
-      title: 'Trabalho / Entrega & Validação',
+      title: 'Trabalho',
       startTime: '09:00',
       endTime: '12:00',
       duration: '3h 00min',
       completed: false,
-      description: 'Revisão final de integrações, execução da bateria de testes e entrega de versão.',
+      description: 'Revisão final de integrações, execução da bateria de testes e entrega.',
       category: 'Foco Profissional',
-    },
-    {
-      id: 'amanha-3',
-      title: 'Almoço & Descompressão',
-      startTime: '12:00',
-      endTime: '13:00',
-      duration: '1h 00min',
-      completed: false,
-      description: 'Alimentação equilibrada e pausa mental longe de dispositivos eletrônicos.',
-      category: 'Recuperação',
-    },
-    {
-      id: 'amanha-4',
-      title: 'Treino Cardio & Resistência',
-      startTime: '18:30',
-      endTime: '19:30',
-      duration: '1h 00min',
-      completed: false,
-      description: 'Corrida intervalada de alta intensidade e trabalho de flexibilidade articular.',
-      category: 'Saúde & Físico',
-    },
-    {
-      id: 'amanha-5',
-      title: 'Estudar & Leitura Livre',
-      startTime: '20:00',
-      endTime: '21:00',
-      duration: '1h 00min',
-      completed: false,
-      description: 'Capítulo sobre modelos mentais e síntese de aprendizados da semana.',
-      category: 'Desenvolvimento',
     },
   ],
 };

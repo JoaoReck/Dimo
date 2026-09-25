@@ -5,7 +5,12 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Activity, ViewMode, DayOffset } from './types';
-import { INITIAL_DAYS_INFO, INITIAL_ACTIVITIES_BY_DAY } from './data/mockActivities';
+import { DEMO_SAMPLE_ACTIVITIES } from './data/mockActivities';
+import {
+  loadSavedActivities,
+  saveActivitiesToStorage,
+  getDynamicDayInfo,
+} from './utils/storage';
 import { Header } from './components/Header';
 import { DaySelector } from './components/DaySelector';
 import { HudStatus } from './components/HudStatus';
@@ -20,20 +25,28 @@ import {
   playStepReopenSound,
   playTickSound,
   setAudioEnabled,
-  isAudioEnabled,
 } from './utils/audio';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<ViewMode>('timeline');
   const [currentOffset, setCurrentOffset] = useState<DayOffset>(0);
-  const [activitiesByDay, setActivitiesByDay] = useState<Record<DayOffset, Activity[]>>(
-    INITIAL_ACTIVITIES_BY_DAY
-  );
+
+  // Initialize from persistent localStorage (defaults to zero fake activities on fresh start)
+  const [activitiesByDay, setActivitiesByDay] = useState<Record<DayOffset, Activity[]>>(() => {
+    return loadSavedActivities();
+  });
 
   const [soundActive, setSoundActive] = useState<boolean>(true);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
+  const [newActivityPrefillTitle, setNewActivityPrefillTitle] = useState<string>('');
+  const [newActivityPrefillTime, setNewActivityPrefillTime] = useState<string | undefined>(undefined);
+
+  // Sync to localStorage on every change so user never loses their real routine
+  useEffect(() => {
+    saveActivitiesToStorage(activitiesByDay);
+  }, [activitiesByDay]);
 
   // Sync sound settings with audio utility
   const handleToggleSound = useCallback(() => {
@@ -43,10 +56,12 @@ export default function App() {
     if (next) playTickSound();
   }, [soundActive]);
 
-  // Current day data
-  const currentDayInfo = INITIAL_DAYS_INFO[currentOffset];
+  // Real dynamic calendar day info
+  const currentDayInfo = useMemo(() => {
+    return getDynamicDayInfo(currentOffset);
+  }, [currentOffset]);
 
-  // Activities sorted by time
+  // Activities sorted by time for the active day
   const currentActivities = useMemo(() => {
     const list = activitiesByDay[currentOffset] || [];
     return [...list].sort((a, b) => a.startTime.localeCompare(b.startTime));
@@ -99,7 +114,7 @@ export default function App() {
           return item;
         });
 
-        // Also update selectedActivity in modal if open
+        // Also update selectedActivity in modal if currently open
         if (selectedActivity && selectedActivity.id === id) {
           setSelectedActivity({
             ...selectedActivity,
@@ -115,6 +130,39 @@ export default function App() {
       });
     },
     [currentOffset, selectedActivity]
+  );
+
+  // Open modal to create new activity with smart contextual defaults
+  const handleOpenNewActivity = useCallback(
+    (suggestedTitle?: string, suggestedTime?: string) => {
+      playTickSound();
+      setEditingActivity(null);
+      setNewActivityPrefillTitle(suggestedTitle || '');
+
+      if (suggestedTime) {
+        setNewActivityPrefillTime(suggestedTime);
+      } else {
+        const list = activitiesByDay[currentOffset] || [];
+        if (list.length > 0) {
+          const sorted = [...list].sort((a, b) => a.startTime.localeCompare(b.startTime));
+          const last = sorted[sorted.length - 1];
+          if (last.endTime) {
+            setNewActivityPrefillTime(last.endTime);
+          } else {
+            const [h, m] = last.startTime.split(':').map(Number);
+            const nextH = Math.min(h + 1, 23);
+            setNewActivityPrefillTime(`${String(nextH).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+          }
+        } else {
+          const now = new Date();
+          const currentH = String(now.getHours()).padStart(2, '0');
+          setNewActivityPrefillTime(`${currentH}:00`);
+        }
+      }
+
+      setIsFormOpen(true);
+    },
+    [activitiesByDay, currentOffset]
   );
 
   // Save (Create or Update) activity
@@ -174,7 +222,7 @@ export default function App() {
             startTime: data.startTime,
             endTime: data.endTime,
             description: data.description,
-            category: data.category,
+            category: data.category || 'Rotina',
             completed: false,
             duration,
           };
@@ -213,13 +261,18 @@ export default function App() {
     setIsFormOpen(true);
   }, []);
 
+  // Optional preview sample routine loader
+  const handleLoadSampleRoutine = useCallback(() => {
+    playStepCompleteSound();
+    setActivitiesByDay(DEMO_SAMPLE_ACTIVITIES);
+  }, []);
+
   // Keyboard shortcut listener:
   // Space = toggle next activity
   // 'N' or Cmd+N = new activity
   // 1, 2, 3 = change views
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if typing in an input or textarea
       const target = e.target as HTMLElement;
       if (
         target.tagName === 'INPUT' ||
@@ -241,8 +294,7 @@ export default function App() {
       if ((e.key === 'n' || e.key === 'N') && !e.metaKey && !e.ctrlKey) {
         if (!isFormOpen && !selectedActivity) {
           e.preventDefault();
-          setEditingActivity(null);
-          setIsFormOpen(true);
+          handleOpenNewActivity();
         }
       }
 
@@ -254,7 +306,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [nextActivity, isFormOpen, selectedActivity, handleToggleComplete]);
+  }, [nextActivity, isFormOpen, selectedActivity, handleToggleComplete, handleOpenNewActivity]);
 
   return (
     <div className="w-full max-w-full overflow-x-hidden min-h-screen bg-[#0B0D12] text-[#F5F5F5] flex flex-col font-sans selection:bg-emerald-500/20 selection:text-emerald-400">
@@ -265,11 +317,7 @@ export default function App() {
           playTickSound();
           setCurrentView(v);
         }}
-        onNewActivity={() => {
-          playTickSound();
-          setEditingActivity(null);
-          setIsFormOpen(true);
-        }}
+        onNewActivity={() => handleOpenNewActivity()}
         soundEnabled={soundActive}
         onToggleSound={handleToggleSound}
       />
@@ -305,7 +353,9 @@ export default function App() {
               playTickSound();
               setSelectedActivity(act);
             }}
+            onNewActivity={handleOpenNewActivity}
             nextActivityId={nextActivity?.id}
+            onLoadSample={handleLoadSampleRoutine}
           />
         )}
 
@@ -317,6 +367,7 @@ export default function App() {
               playTickSound();
               setSelectedActivity(act);
             }}
+            onNewActivity={() => handleOpenNewActivity()}
             nextActivityId={nextActivity?.id}
           />
         )}
@@ -329,6 +380,7 @@ export default function App() {
               playTickSound();
               setSelectedActivity(act);
             }}
+            onNewActivity={(time) => handleOpenNewActivity(undefined, time)}
             nextActivityId={nextActivity?.id}
           />
         )}
@@ -350,9 +402,13 @@ export default function App() {
         onClose={() => {
           setIsFormOpen(false);
           setEditingActivity(null);
+          setNewActivityPrefillTitle('');
+          setNewActivityPrefillTime(undefined);
         }}
         onSave={handleSaveActivity}
         initialActivity={editingActivity}
+        initialTitle={newActivityPrefillTitle}
+        defaultStartTime={newActivityPrefillTime}
         dayInfo={currentDayInfo}
       />
 

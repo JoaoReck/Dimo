@@ -1,26 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { Activity } from '../types';
-import { Check, Clock, Sparkles, RotateCcw, Compass, GitCommit, ChevronRight, Eye } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import {
+  Check,
+  Clock,
+  Sparkles,
+  Compass,
+  Plus,
+  ChevronRight,
+  ArrowDown,
+  RotateCcw,
+} from 'lucide-react';
+import { motion } from 'motion/react';
 
 interface TimelineViewProps {
   activities: Activity[];
   onToggleComplete: (id: string, e?: React.MouseEvent) => void;
   onOpenDetail: (activity: Activity) => void;
+  onNewActivity: (suggestedTitle?: string) => void;
   nextActivityId?: string;
+  onLoadSample?: () => void;
 }
 
 export const TimelineView: React.FC<TimelineViewProps> = ({
   activities,
   onToggleComplete,
   onOpenDetail,
+  onNewActivity,
   nextActivityId,
+  onLoadSample,
 }) => {
   // Trail style: organic winding path or vertical straight path
   const [isCurvedTrail, setIsCurvedTrail] = useState<boolean>(true);
 
-  // Live elapsed timer for the active next step to give a live ticking presence
-  const [secondsElapsed, setSecondsElapsed] = useState<number>(2535); // starts at ~42min
+  // Live elapsed timer for the active next step
+  const [secondsElapsed, setSecondsElapsed] = useState<number>(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -36,25 +49,149 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     return `${hrs}:${mins}:${secs}`;
   };
 
+  // Check if active activity time has passed
+  const isTimeInPast = (timeStr?: string): boolean => {
+    if (!timeStr) return false;
+    const [h, m] = timeStr.split(':').map(Number);
+    const now = new Date();
+    const currentH = now.getHours();
+    const currentM = now.getMinutes();
+    return currentH > h || (currentH === h && currentM > m);
+  };
+
+  // ==========================================
+  // ESTADO INICIAL: ZERO ATIVIDADES NO DIA
+  // A jornada começa conduzindo o usuário intuitivamente
+  // ==========================================
   if (activities.length === 0) {
+    const suggestions = [
+      { title: 'Café', desc: 'Rotina matinal' },
+      { title: 'Trabalho', desc: 'Foco profundo' },
+      { title: 'Almoço', desc: 'Pausa nutritiva' },
+      { title: 'Treino', desc: 'Saúde & Físico' },
+      { title: 'Estudar', desc: 'Desenvolvimento' },
+    ];
+
     return (
-      <div className="w-full max-w-lg mx-auto px-4 py-16 text-center">
-        <div className="p-8 rounded-2xl border border-dashed border-[#252A33] bg-[#13161D]/50">
-          <p className="text-[#8B919E] mb-2 font-mono text-sm">
-            Nenhuma etapa cadastrada para esta jornada.
-          </p>
-          <p className="text-xs text-neutral-500">
-            Clique em "+ NOVA" para traçar o seu caminho pelo dia.
-          </p>
+      <div className="w-full max-w-lg mx-auto px-3 sm:px-4 pb-20 select-none">
+        {/* Top Trail Controls: Start Marker */}
+        <div className="flex items-center justify-between pt-1 pb-4 px-2">
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#13161D] border border-[#252A33] text-[10px] font-mono text-[#8B919E] uppercase tracking-wider shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#22C55E]" />
+            <span>INÍCIO DA JORNADA</span>
+          </div>
+
+          <span className="text-[10px] font-mono text-neutral-500">
+            PASSO 01: CRIAR ATIVIDADE
+          </span>
+        </div>
+
+        {/* Journey Track to Start Node */}
+        <div className="relative flex flex-col items-center w-full py-2">
+          {/* Lead-in road connector */}
+          <div className="flex flex-col items-center h-8 w-full justify-center">
+            <div className="w-[4px] h-full rounded-full bg-[#252A33]" />
+          </div>
+
+          {/* BOLINHA ESPECIAL DE INÍCIO (COMEÇAR) */}
+          <div className="relative z-20 flex flex-col items-center">
+            <motion.button
+              whileHover={{ scale: 1.06 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => onNewActivity()}
+              className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full flex flex-col items-center justify-center p-3 cursor-pointer transition-all duration-300 border-2 border-dashed border-emerald-500/70 hover:border-emerald-400 bg-[#13161D] hover:bg-[#181C26] text-white shadow-[0_0_30px_rgba(34,197,94,0.18)] hover:shadow-[0_0_40px_rgba(34,197,94,0.35)] group"
+              title="Clique para adicionar a primeira atividade"
+            >
+              {/* Subtle pulsing background glow */}
+              <div className="absolute inset-0 rounded-full bg-emerald-500/5 group-hover:bg-emerald-500/10 transition-colors pointer-events-none" />
+
+              {/* Top tag */}
+              <span className="text-[10px] font-mono text-emerald-400/90 font-bold tracking-widest uppercase mb-1">
+                JORNADA
+              </span>
+
+              {/* Center bold title */}
+              <span className="text-sm sm:text-base font-black uppercase tracking-wider text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                COMEÇAR
+              </span>
+
+              {/* Bottom cue */}
+              <div className="mt-1 flex items-center gap-1 text-[10px] font-mono text-emerald-400 font-semibold bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                <Plus className="w-3 h-3 stroke-[3]" />
+                <span>CRIAR</span>
+              </div>
+            </motion.button>
+          </div>
+
+          {/* Road connector leading to context card */}
+          <div className="flex flex-col items-center h-10 w-full justify-center">
+            <div className="w-[4px] h-full rounded-full bg-gradient-to-b from-[#252A33] to-[#181C26]" />
+          </div>
+
+          {/* Contextual guidance card: "Vamos montar seu dia" */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="w-full max-w-sm rounded-2xl bg-[#13161D] border border-[#252A33] p-5 sm:p-6 text-center shadow-xl flex flex-col items-center"
+          >
+            <h3 className="text-base sm:text-lg font-bold text-white mb-1.5 tracking-tight">
+              Vamos montar seu dia.
+            </h3>
+            <p className="text-xs sm:text-sm text-[#8B919E] mb-5 leading-relaxed">
+              Adicione sua primeira atividade para começar sua jornada. Cada bolinha será uma etapa do seu dia.
+            </p>
+
+            {/* Big Primary Action Button */}
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={() => onNewActivity()}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-black font-mono font-bold text-xs sm:text-sm tracking-wider transition-all shadow-[0_0_20px_rgba(34,197,94,0.35)] cursor-pointer"
+            >
+              <Plus className="w-4 h-4 stroke-[3]" />
+              <span>+ NOVA ATIVIDADE</span>
+            </motion.button>
+
+            {/* Suggestions / inspiration placeholders */}
+            <div className="w-full mt-5 pt-4 border-t border-[#252A33]">
+              <span className="block text-[10px] font-mono text-[#6A7280] uppercase tracking-wider mb-2.5">
+                OU ESCOLHA UMA ETAPA COMUM PARA INICIAR:
+              </span>
+              <div className="flex flex-wrap items-center justify-center gap-1.5">
+                {suggestions.map((item) => (
+                  <button
+                    key={item.title}
+                    onClick={() => onNewActivity(item.title)}
+                    className="px-2.5 py-1 rounded-lg bg-[#181C26] hover:bg-[#202533] border border-[#252A33] hover:border-emerald-500/40 text-xs font-mono text-[#D0D4DC] hover:text-emerald-400 transition-all cursor-pointer flex items-center gap-1"
+                  >
+                    <span>{item.title}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Optional preview sample routine */}
+            {onLoadSample && (
+              <button
+                onClick={onLoadSample}
+                className="mt-4 text-[11px] font-mono text-[#6A7280] hover:text-[#8B919E] underline underline-offset-4 transition-colors cursor-pointer"
+              >
+                Preencher com rotina de demonstração
+              </button>
+            )}
+          </motion.div>
         </div>
       </div>
     );
   }
 
+  // ==========================================
+  // JORNADA COM ATIVIDADES
+  // ==========================================
   const allCompleted = activities.length > 0 && activities.every((a) => a.completed);
 
-  // Gentle horizontal offsets for the organic winding journey trail (in px relative to center)
-  // Perfectly sized so nodes (96px) remain well inside mobile viewports without overflow
+  // Gentle horizontal offsets for the organic winding journey trail
   const getOffset = (index: number) => {
     if (!isCurvedTrail) return 0;
     const offsets = [24, -28, 26, -24, 18, -20, 15];
@@ -99,17 +236,17 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           const isCompleted = activity.completed;
           const isNext = activity.id === nextActivityId && !isCompleted;
           const isLast = index === activities.length - 1;
+          const timePast = !isCompleted && isTimeInPast(activity.startTime);
 
           const currentOffset = getOffset(index);
           const nextOffset = !isLast ? getOffset(index + 1) : 0;
 
-          // Road connector status to the next node:
-          // The road segment is illuminated in vibrant emerald green when THIS node is completed!
+          // Road connector status to next node
           const isLineToNextActive = isCompleted;
 
           return (
             <div key={activity.id} className="w-full flex flex-col items-center">
-              {/* NODE CONTAINER (Positioned with gentle horizontal offset) */}
+              {/* NODE CONTAINER */}
               <div
                 className="relative z-20 flex flex-col items-center transition-transform duration-500 ease-out"
                 style={{
@@ -133,7 +270,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => onOpenDetail(activity)}
-                  title="Toque para revelar o momento"
+                  title="Toque para ver detalhes da etapa"
                   className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-full flex flex-col items-center justify-between p-2.5 sm:p-3 cursor-pointer transition-all duration-300 border-2 select-none group ${
                     isCompleted
                       ? 'bg-[#0b1f14] border-emerald-500 text-emerald-300 shadow-[0_0_24px_rgba(34,197,94,0.35)] hover:border-emerald-400'
@@ -219,13 +356,20 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   </button>
                 </motion.div>
 
-                {/* ACTIVE STEP DIRECT ACTIONS: One-click Advance Button & Live Timer */}
+                {/* ACTIVE STEP ACTIONS: One-click Advance Button & Live Timer */}
                 {isNext && (
                   <motion.div
                     initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="mt-2.5 flex flex-col items-center gap-1.5 z-30"
                   >
+                    {/* Friendly gentle encouragement if time passed (No aggressive penalty) */}
+                    {timePast && (
+                      <div className="text-[10px] font-mono text-[#A0A5B0] bg-[#181C26] px-2.5 py-0.5 rounded-full border border-[#252A33] mb-1">
+                        Você pode continuar daqui
+                      </div>
+                    )}
+
                     {/* Quick Complete Action Button */}
                     <motion.button
                       whileHover={{ scale: 1.04 }}
@@ -254,7 +398,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                         onClick={() => onOpenDetail(activity)}
                         className="hover:text-white underline underline-offset-2 transition-colors cursor-pointer"
                       >
-                        Ver momento
+                        Ver detalhes
                       </button>
                     </div>
                   </motion.div>
@@ -286,7 +430,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               {!isLast && (
                 <div className="w-full flex items-center justify-center my-1 pointer-events-none">
                   {isCurvedTrail ? (
-                    /* Organic Bezier Curve SVG linking node i to node i+1 */
                     <svg
                       className="w-48 h-14 overflow-visible"
                       viewBox="0 0 192 56"
@@ -329,7 +472,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                       )}
                     </svg>
                   ) : (
-                    /* Straight Spine Line */
                     <div className="flex flex-col items-center h-12 w-full justify-center">
                       <div
                         className={`w-[4px] h-full rounded-full transition-all duration-500 ${
@@ -346,10 +488,52 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           );
         })}
 
+        {/* ======================================================== */}
+        {/* CONDICIONAL: CONDUZIR O USUÁRIO APÓS CRIAR ATIVIDADE(S) */}
+        {/* ======================================================== */}
+
+        {/* Connector from last activity down to Add Next / Final Marker */}
+        <div className="flex flex-col items-center h-8 w-full justify-center">
+          <div
+            className={`w-[4px] h-full rounded-full transition-all duration-500 ${
+              allCompleted
+                ? 'bg-emerald-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]'
+                : 'bg-[#252A33]'
+            }`}
+          />
+        </div>
+
+        {/* If user has 1 activity: show gentle contextual guidance banner */}
+        {activities.length === 1 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="my-3 max-w-xs text-center px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono"
+          >
+            Sua primeira etapa está pronta! Adicione outras atividades para montar seu dia.
+          </motion.div>
+        )}
+
+        {/* "ADICIONAR OUTRA ETAPA" GHOST / DASHED NODE ON THE ROAD */}
+        <div className="relative z-20 flex flex-col items-center my-2">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onNewActivity()}
+            className="w-20 h-20 sm:w-22 sm:h-22 rounded-full border-2 border-dashed border-[#3B4252] hover:border-emerald-400 bg-[#13161D]/70 hover:bg-[#181C26] flex flex-col items-center justify-center p-2 text-center text-[#8B919E] hover:text-emerald-400 transition-all cursor-pointer group shadow-md"
+            title="Adicionar outra atividade na sequência"
+          >
+            <Plus className="w-4 h-4 mb-0.5 stroke-[2.5] text-emerald-500/70 group-hover:text-emerald-400 transition-colors" />
+            <span className="text-[9px] sm:text-[10px] font-mono font-bold uppercase leading-tight">
+              {activities.length === 1 ? 'ADICIONAR OUTRA' : 'NOVA ETAPA'}
+            </span>
+          </motion.button>
+        </div>
+
         {/* Final Journey Milestone Marker */}
         <div className="w-full flex flex-col items-center pt-2">
-          {/* Connector to end */}
-          <div className="flex flex-col items-center h-8 w-full justify-center">
+          {/* Small connector */}
+          <div className="flex flex-col items-center h-6 w-full justify-center">
             <div
               className={`w-[4px] h-full rounded-full transition-all duration-500 ${
                 allCompleted
@@ -375,7 +559,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             ) : (
               <>
                 <span className="w-2 h-2 rounded-full bg-[#252A33]" />
-                <span>FIM DO CICLO DIÁRIO</span>
+                <span>CICLO DA JORNADA</span>
               </>
             )}
           </motion.div>
