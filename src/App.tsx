@@ -20,6 +20,9 @@ import { CalendarView } from './components/CalendarView';
 import { ActivityDetailModal } from './components/ActivityDetailModal';
 import { ActivityFormModal } from './components/ActivityFormModal';
 import { FooterBar } from './components/FooterBar';
+import { InstallBanner } from './components/InstallBanner';
+import { InstallGuideModal } from './components/InstallGuideModal';
+import { useMobilePWA } from './utils/useMobilePWA';
 import {
   playStepCompleteSound,
   playStepReopenSound,
@@ -30,6 +33,9 @@ import {
 export default function App() {
   const [currentView, setCurrentView] = useState<ViewMode>('timeline');
   const [currentOffset, setCurrentOffset] = useState<DayOffset>(0);
+
+  // Mobile Web App / PWA install flow & standalone detection
+  const pwa = useMobilePWA();
 
   // Initialize from persistent localStorage (defaults to zero fake activities on fresh start)
   const [activitiesByDay, setActivitiesByDay] = useState<Record<DayOffset, Activity[]>>(() => {
@@ -320,6 +326,14 @@ export default function App() {
         onNewActivity={() => handleOpenNewActivity()}
         soundEnabled={soundActive}
         onToggleSound={handleToggleSound}
+        showInstallOption={pwa.isMobile && !pwa.isStandalone}
+        onInstallClick={() => {
+          if (pwa.canInstallNative) {
+            pwa.triggerNativeInstall();
+          } else {
+            pwa.openGuide();
+          }
+        }}
       />
 
       {/* Main Container */}
@@ -410,6 +424,25 @@ export default function App() {
         initialTitle={newActivityPrefillTitle}
         defaultStartTime={newActivityPrefillTime}
         dayInfo={currentDayInfo}
+      />
+
+      {/* Mobile Web App Install Invitation Banner */}
+      {pwa.isMobile && !pwa.isStandalone && !pwa.hasDismissedBanner && (
+        <InstallBanner
+          isIOS={pwa.isIOS}
+          canInstallNative={pwa.canInstallNative}
+          onOpenGuide={pwa.openGuide}
+          onNativeInstall={pwa.triggerNativeInstall}
+          onDismiss={pwa.dismissBanner}
+        />
+      )}
+
+      {/* Visual Installation Guide Modal (iPhone/Safari & Android) */}
+      <InstallGuideModal
+        isOpen={pwa.isGuideOpen}
+        onClose={pwa.closeGuide}
+        onConfirmAdded={pwa.confirmGuideCompleted}
+        isIOS={pwa.isIOS}
       />
 
       {/* Live Bottom Footer Bar */}

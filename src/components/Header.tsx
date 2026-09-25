@@ -1,6 +1,6 @@
 import React from 'react';
 import { ViewMode } from '../types';
-import { Plus, Volume2, VolumeX, GitCommitVertical, CheckSquare, CalendarDays } from 'lucide-react';
+import { Plus, Volume2, VolumeX, GitCommitVertical, CheckSquare, CalendarDays, Smartphone } from 'lucide-react';
 import { DimoLogo } from './DimoLogo';
 
 interface HeaderProps {
@@ -9,6 +9,8 @@ interface HeaderProps {
   onNewActivity: () => void;
   soundEnabled: boolean;
   onToggleSound: () => void;
+  showInstallOption?: boolean;
+  onInstallClick?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -17,9 +19,14 @@ export const Header: React.FC<HeaderProps> = ({
   onNewActivity,
   soundEnabled,
   onToggleSound,
+  showInstallOption = false,
+  onInstallClick,
 }) => {
   return (
-    <header className="w-full border-b border-[#252A33] bg-[#0B0D12]/95 backdrop-blur-md sticky top-0 z-40">
+    <header
+      className="w-full border-b border-[#252A33] bg-[#0B0D12]/95 backdrop-blur-md sticky top-0 z-40"
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+    >
       <div className="w-full max-w-2xl mx-auto px-3 sm:px-4 h-15 sm:h-16 flex items-center justify-between gap-2">
         {/* Left: Brand Logo */}
         <div className="shrink-0">
@@ -71,11 +78,24 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right: Sound toggle & New Activity CTA */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Mobile Install Option (only when on mobile and not standalone) */}
+          {showInstallOption && (
+            <button
+              onClick={onInstallClick}
+              title="Adicionar Dimo à Tela Inicial"
+              className="p-1.5 sm:p-2 rounded-lg border border-emerald-500/40 bg-[#13161D] text-emerald-400 hover:text-white hover:border-emerald-400 transition-colors cursor-pointer flex items-center gap-1 shadow-[0_0_10px_rgba(34,197,94,0.15)]"
+              aria-label="Adicionar Dimo à Tela Inicial"
+            >
+              <Smartphone className="w-4 h-4 text-emerald-400" />
+              <span className="hidden md:inline text-[10px] font-mono font-bold">APP</span>
+            </button>
+          )}
+
           {/* Audio feedback toggle */}
           <button
             onClick={onToggleSound}
             title={soundEnabled ? 'Silenciar efeitos sonoros táteis' : 'Ativar efeitos táteis'}
-            className="p-1.5 sm:p-2 rounded-lg border border-[#252A33] bg-[#13161D] text-[#8B919E] hover:text-white hover:border-[#3B4252] transition-colors"
+            className="p-1.5 sm:p-2 rounded-lg border border-[#252A33] bg-[#13161D] text-[#8B919E] hover:text-white hover:border-[#3B4252] transition-colors cursor-pointer"
             aria-label="Alternar som"
           >
             {soundEnabled ? (
@@ -88,7 +108,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* New Activity CTA */}
           <button
             onClick={onNewActivity}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-[#0B0D12] text-xs font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(34,197,94,0.3)] hover:shadow-[0_0_20px_rgba(34,197,94,0.45)]"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-[#0B0D12] text-xs font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(34,197,94,0.3)] hover:shadow-[0_0_20px_rgba(34,197,94,0.45)] cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5 stroke-[3]" />
             <span className="hidden sm:inline tracking-wider">NOVA</span>

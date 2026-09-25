@@ -21,7 +21,10 @@ export const FooterBar: React.FC = () => {
   }, []);
 
   return (
-    <footer className="w-full border-t border-[#252A33] bg-[#0B0D12]/95 backdrop-blur-md py-2.5 text-[11px] font-mono text-[#8B919E] fixed bottom-0 left-0 right-0 z-30">
+    <footer
+      className="w-full border-t border-[#252A33] bg-[#0B0D12]/95 backdrop-blur-md pt-2.5 text-[11px] font-mono text-[#8B919E] fixed bottom-0 left-0 right-0 z-30 select-none"
+      style={{ paddingBottom: 'max(0.625rem, env(safe-area-inset-bottom, 0px))' }}
+    >
       <div className="w-full max-w-lg mx-auto px-3 sm:px-4 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1 text-[10px] sm:text-xs">
           <span className="text-emerald-400 font-semibold">[</span>
