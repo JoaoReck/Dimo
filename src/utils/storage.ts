@@ -8,48 +8,68 @@ export const EMPTY_ACTIVITIES_BY_DAY: Record<DayOffset, Activity[]> = {
   [1]: [],
 };
 
-// Calculate real dynamic dates for any day offset (-1 = ontem, 0 = hoje, 1 = amanhã)
+// Calculate real dynamic dates for any day offset (-1 = ontem, 0 = hoje, 1 = amanhã, etc.)
 export function getDynamicDayInfo(offset: DayOffset): DayInfo {
   const d = new Date();
   d.setDate(d.getDate() + offset);
 
-  // e.g. "qui", "sex", "sáb"
-  const rawDayOfWeek = d.toLocaleDateString('pt-BR', { weekday: 'short' });
-  const dayOfWeek = rawDayOfWeek.replace('.', '').toUpperCase();
+  // Capitalize weekday e.g. "Domingo", "Segunda-feira"
+  const rawDayOfWeek = d.toLocaleDateString('pt-BR', { weekday: 'long' });
+  const dayOfWeek = rawDayOfWeek.charAt(0).toUpperCase() + rawDayOfWeek.slice(1);
 
   const dayNum = String(d.getDate()).padStart(2, '0');
-  const monthShort = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '').toUpperCase();
   const fullMonth = d.toLocaleDateString('pt-BR', { month: 'long' });
+  const monthCap = fullMonth.charAt(0).toUpperCase() + fullMonth.slice(1);
 
-  const labelPrefix = offset === 0 ? 'HOJE' : offset === -1 ? 'ONTEM' : 'AMANHÃ';
-  const shortLabel = offset === 0 ? 'Hoje' : offset === -1 ? 'Ontem' : 'Amanhã';
+  let prefix = '';
+  let shortLabel = dayOfWeek;
+  if (offset === 0) {
+    prefix = 'Hoje // ';
+    shortLabel = 'Hoje';
+  } else if (offset === -1) {
+    prefix = 'Ontem // ';
+    shortLabel = 'Ontem';
+  } else if (offset === 1) {
+    prefix = 'Amanhã // ';
+    shortLabel = 'Amanhã';
+  }
+
+  const label = `${prefix}${dayOfWeek}, ${dayNum} de ${fullMonth}`;
+
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const isoKey = `${yyyy}-${mm}-${dd}`;
 
   return {
     offset,
-    dateKey: offset === 0 ? 'hoje' : offset === -1 ? 'ontem' : 'amanha',
-    label: `${labelPrefix} // ${dayOfWeek}, ${dayNum} ${monthShort}`,
+    dateKey: isoKey,
+    label,
     shortLabel,
-    dateFormatted: `${dayNum} de ${fullMonth.charAt(0).toUpperCase() + fullMonth.slice(1)}`,
+    dateFormatted: `${dayNum} de ${monthCap}`,
   };
 }
 
-// Load activities from localStorage
+// Load activities from localStorage (supports any numeric day offset)
 export function loadSavedActivities(): Record<DayOffset, Activity[]> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      // New user or empty start: zero fake activities
       return { [-1]: [], [0]: [], [1]: [] };
     }
     const parsed = JSON.parse(raw);
-    return {
-      [-1]: Array.isArray(parsed[-1]) ? parsed[-1] : [],
-      [0]: Array.isArray(parsed[0]) ? parsed[0] : [],
-      [1]: Array.isArray(parsed[1]) ? parsed[1] : [],
-    };
+    const result: Record<DayOffset, Activity[]> = {};
+    for (const key of Object.keys(parsed)) {
+      const numKey = Number(key);
+      if (!isNaN(numKey) && Array.isArray(parsed[key])) {
+        result[numKey] = parsed[key];
+      }
+    }
+    if (!result[0]) result[0] = [];
+    return result;
   } catch (err) {
     console.error('Failed to load activities from storage:', err);
-    return { [-1]: [], [0]: [], [1]: [] };
+    return { [0]: [] };
   }
 }
 

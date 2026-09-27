@@ -13,7 +13,6 @@ import {
 } from './utils/storage';
 import { Header } from './components/Header';
 import { DaySelector } from './components/DaySelector';
-import { HudStatus } from './components/HudStatus';
 import { TimelineView } from './components/TimelineView';
 import { ChecklistView } from './components/ChecklistView';
 import { CalendarView } from './components/CalendarView';
@@ -48,6 +47,17 @@ export default function App() {
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [newActivityPrefillTitle, setNewActivityPrefillTitle] = useState<string>('');
   const [newActivityPrefillTime, setNewActivityPrefillTime] = useState<string | undefined>(undefined);
+  const [centerKey, setCenterKey] = useState<number>(0);
+
+  // Prevent whole-window scrolling, keep scroll restoration manual
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual';
+      }
+      window.scrollTo(0, 0);
+    }
+  }, []);
 
   // Sync to localStorage on every change so user never loses their real routine
   useEffect(() => {
@@ -85,6 +95,23 @@ export default function App() {
   const totalActivities = currentActivities.length;
   const completedActivities = currentActivities.filter((a) => a.completed).length;
   const allCompleted = totalActivities > 0 && completedActivities === totalActivities;
+
+  // Daily missions calculation (0 to 3) for the active day
+  const dailyMissionsCompleted = useMemo(() => {
+    let count = 0;
+    // 1. Planejar: pelo menos 1 atividade criada para o dia
+    if (totalActivities > 0) count++;
+    // 2. Foco: pelo menos 1 atividade concluída
+    if (completedActivities >= 1) count++;
+    // 3. Constância: concluir 3 atividades (ou todas se houver pelo menos 2)
+    if (
+      completedActivities >= 3 ||
+      (totalActivities >= 2 && completedActivities === totalActivities)
+    ) {
+      count++;
+    }
+    return Math.min(3, count);
+  }, [totalActivities, completedActivities]);
 
   // Toggle completion of an activity
   const handleToggleComplete = useCallback(
@@ -315,50 +342,40 @@ export default function App() {
   }, [nextActivity, isFormOpen, selectedActivity, handleToggleComplete, handleOpenNewActivity]);
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden min-h-screen bg-[#0B0D12] text-[#F5F5F5] flex flex-col font-sans selection:bg-emerald-500/20 selection:text-emerald-400">
-      {/* Top Header */}
-      <Header
-        currentView={currentView}
-        onViewChange={(v) => {
-          playTickSound();
-          setCurrentView(v);
-        }}
-        onNewActivity={() => handleOpenNewActivity()}
-        soundEnabled={soundActive}
-        onToggleSound={handleToggleSound}
-        showInstallOption={pwa.isMobile && !pwa.isStandalone}
-        onInstallClick={() => {
-          if (pwa.canInstallNative) {
-            pwa.triggerNativeInstall();
-          } else {
-            pwa.openGuide();
-          }
-        }}
-      />
+    <div className="w-full h-full h-[100dvh] max-w-full overflow-hidden bg-[#0B0D12] text-[#F5F5F5] flex flex-col font-sans selection:bg-emerald-500/20 selection:text-emerald-400">
+      {/* ÁREA 1 — INTERFACE FIXA (Header + DaySelector) */}
+      <header className="shrink-0 w-full z-30 bg-[#0B0D12]/95 backdrop-blur-md border-b border-[#252A33] shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+        <Header
+          currentView={currentView}
+          onViewChange={(v) => {
+            playTickSound();
+            setCurrentView(v);
+          }}
+        />
 
-      {/* Main Container */}
-      <main className="w-full max-w-full overflow-x-hidden flex-1 pb-20">
-        {/* Day Selector & Overall Progress */}
+        {/* Clean Day Navigation - Pinned in Fixed Toolbar */}
         <DaySelector
           currentOffset={currentOffset}
           dayInfo={currentDayInfo}
-          onSelectOffset={(offset) => {
+          onPrevDay={() => {
             playTickSound();
-            setCurrentOffset(offset);
+            setCurrentOffset((prev) => prev - 1);
           }}
-          totalActivities={totalActivities}
-          completedActivities={completedActivities}
+          onNextDay={() => {
+            playTickSound();
+            setCurrentOffset((prev) => prev + 1);
+          }}
+          onToday={() => {
+            playTickSound();
+            setCurrentOffset(0);
+            setCenterKey((prev) => prev + 1);
+          }}
         />
+      </header>
 
-        {/* Phase Philosophy HUD Banner */}
-        <HudStatus
-          currentStepIndex={nextActivityIndex === -1 ? totalActivities : nextActivityIndex}
-          totalSteps={totalActivities}
-          allCompleted={allCompleted}
-          nextActivity={nextActivity}
-        />
-
-        {/* View Switcher Content */}
+      {/* ÁREA 2 — TIMELINE / VISTAS COM SCROLL INTERNO INDEPENDENTE */}
+      <main className="w-full flex-1 min-h-0 overflow-hidden relative flex flex-col">
+        {/* Timeline View - 24 Hours with Independent Smooth Scroll */}
         {currentView === 'timeline' && (
           <TimelineView
             activities={currentActivities}
@@ -369,34 +386,48 @@ export default function App() {
             }}
             onNewActivity={handleOpenNewActivity}
             nextActivityId={nextActivity?.id}
-            onLoadSample={handleLoadSampleRoutine}
+            isToday={currentOffset === 0}
+            currentOffset={currentOffset}
+            centerKey={centerKey}
           />
         )}
 
+        {/* Checklist View - Internal Scroll */}
         {currentView === 'checklist' && (
-          <ChecklistView
-            activities={currentActivities}
-            onToggleComplete={handleToggleComplete}
-            onOpenDetail={(act) => {
-              playTickSound();
-              setSelectedActivity(act);
-            }}
-            onNewActivity={() => handleOpenNewActivity()}
-            nextActivityId={nextActivity?.id}
-          />
+          <div
+            className="w-full flex-1 min-h-0 overflow-y-auto overscroll-contain pb-24 pt-2"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            <ChecklistView
+              activities={currentActivities}
+              onToggleComplete={handleToggleComplete}
+              onOpenDetail={(act) => {
+                playTickSound();
+                setSelectedActivity(act);
+              }}
+              onNewActivity={() => handleOpenNewActivity()}
+              nextActivityId={nextActivity?.id}
+            />
+          </div>
         )}
 
+        {/* Calendar View - Internal Scroll */}
         {currentView === 'calendar' && (
-          <CalendarView
-            activities={currentActivities}
-            onToggleComplete={handleToggleComplete}
-            onOpenDetail={(act) => {
-              playTickSound();
-              setSelectedActivity(act);
-            }}
-            onNewActivity={(time) => handleOpenNewActivity(undefined, time)}
-            nextActivityId={nextActivity?.id}
-          />
+          <div
+            className="w-full flex-1 min-h-0 overflow-y-auto overscroll-contain pb-24 pt-2"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            <CalendarView
+              activities={currentActivities}
+              onToggleComplete={handleToggleComplete}
+              onOpenDetail={(act) => {
+                playTickSound();
+                setSelectedActivity(act);
+              }}
+              onNewActivity={(time) => handleOpenNewActivity(undefined, time)}
+              nextActivityId={nextActivity?.id}
+            />
+          </div>
         )}
       </main>
 
@@ -446,7 +477,7 @@ export default function App() {
       />
 
       {/* Live Bottom Footer Bar */}
-      <FooterBar />
+      <FooterBar missionsCompleted={dailyMissionsCompleted} />
     </div>
   );
 }

@@ -1,24 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { Activity } from '../types';
-import {
-  Check,
-  Clock,
-  Sparkles,
-  Compass,
-  Plus,
-  ChevronRight,
-  ArrowDown,
-  RotateCcw,
-} from 'lucide-react';
+import { Check, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface TimelineViewProps {
   activities: Activity[];
   onToggleComplete: (id: string, e?: React.MouseEvent) => void;
   onOpenDetail: (activity: Activity) => void;
-  onNewActivity: (suggestedTitle?: string) => void;
+  onNewActivity: (suggestedTitle?: string, suggestedTime?: string) => void;
   nextActivityId?: string;
-  onLoadSample?: () => void;
+  isToday?: boolean;
+  currentOffset?: number;
+  centerKey?: number;
 }
 
 export const TimelineView: React.FC<TimelineViewProps> = ({
@@ -27,543 +20,292 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   onOpenDetail,
   onNewActivity,
   nextActivityId,
-  onLoadSample,
+  isToday = false,
+  currentOffset = 0,
+  centerKey = 0,
 }) => {
-  // Trail style: organic winding path or vertical straight path
-  const [isCurvedTrail, setIsCurvedTrail] = useState<boolean>(true);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const currentHourRef = useRef<HTMLDivElement | null>(null);
+  const currentHour = new Date().getHours();
 
-  // Live elapsed timer for the active next step
-  const [secondsElapsed, setSecondsElapsed] = useState<number>(0);
+  // Scroll internally to current hour without moving window or header
+  const scrollToCurrentHour = useCallback((smooth: boolean = true) => {
+    const container = containerRef.current;
+    const target = currentHourRef.current;
+    if (container && target) {
+      const targetRect = target.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      const relativeTop = targetRect.top - containerRect.top + container.scrollTop;
+      const targetHeight = targetRect.height || 48;
+      const containerHeight = container.clientHeight;
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSecondsElapsed((prev) => prev + 1);
-    }, 1000);
-    return () => clearInterval(interval);
+      const scrollToY = Math.max(
+        0,
+        relativeTop - (containerHeight / 2) + (targetHeight / 2)
+      );
+
+      container.scrollTo({
+        top: scrollToY,
+        behavior: smooth ? 'smooth' : 'auto',
+      });
+    }
   }, []);
 
-  const formatTimer = (totalSec: number) => {
-    const hrs = String(Math.floor(totalSec / 3600)).padStart(2, '0');
-    const mins = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
-    const secs = String(totalSec % 60).padStart(2, '0');
-    return `${hrs}:${mins}:${secs}`;
-  };
+  // Center on current hour when viewing Today, on mount, or when user taps "Hoje"
+  useEffect(() => {
+    if (isToday) {
+      const timer = setTimeout(() => {
+        scrollToCurrentHour(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isToday, centerKey, scrollToCurrentHour]);
 
-  // Check if active activity time has passed
-  const isTimeInPast = (timeStr?: string): boolean => {
-    if (!timeStr) return false;
-    const [h, m] = timeStr.split(':').map(Number);
-    const now = new Date();
-    const currentH = now.getHours();
-    const currentM = now.getMinutes();
-    return currentH > h || (currentH === h && currentM > m);
-  };
+  // Reset scroll to top of the 24-hour day when viewing another day
+  useEffect(() => {
+    if (!isToday && containerRef.current) {
+      containerRef.current.scrollTo({
+        top: 0,
+        behavior: 'auto',
+      });
+    }
+  }, [isToday, currentOffset]);
 
-  // ==========================================
-  // ESTADO INICIAL: ZERO ATIVIDADES NO DIA
-  // A jornada começa conduzindo o usuário intuitivamente
-  // ==========================================
-  if (activities.length === 0) {
-    const suggestions = [
-      { title: 'Café', desc: 'Rotina matinal' },
-      { title: 'Trabalho', desc: 'Foco profundo' },
-      { title: 'Almoço', desc: 'Pausa nutritiva' },
-      { title: 'Treino', desc: 'Saúde & Físico' },
-      { title: 'Estudar', desc: 'Desenvolvimento' },
-    ];
+  // Hours 0 through 23
+  const hours = Array.from({ length: 24 }, (_, i) => i);
 
-    return (
-      <div className="w-full max-w-lg mx-auto px-3 sm:px-4 pb-20 select-none">
-        {/* Top Trail Controls: Start Marker */}
-        <div className="flex items-center justify-between pt-1 pb-4 px-2">
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#13161D] border border-[#252A33] text-[10px] font-mono text-[#8B919E] uppercase tracking-wider shadow-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#22C55E]" />
-            <span>INÍCIO DA JORNADA</span>
-          </div>
-
-          <span className="text-[10px] font-mono text-neutral-500">
-            PASSO 01: CRIAR ATIVIDADE
-          </span>
-        </div>
-
-        {/* Journey Track to Start Node */}
-        <div className="relative flex flex-col items-center w-full py-2">
-          {/* Lead-in road connector */}
-          <div className="flex flex-col items-center h-8 w-full justify-center">
-            <div className="w-[4px] h-full rounded-full bg-[#252A33]" />
-          </div>
-
-          {/* BOLINHA ESPECIAL DE INÍCIO (COMEÇAR) */}
-          <div className="relative z-20 flex flex-col items-center">
-            <motion.button
-              whileHover={{ scale: 1.06 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => onNewActivity()}
-              className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full flex flex-col items-center justify-center p-3 cursor-pointer transition-all duration-300 border-2 border-dashed border-emerald-500/70 hover:border-emerald-400 bg-[#13161D] hover:bg-[#181C26] text-white shadow-[0_0_30px_rgba(34,197,94,0.18)] hover:shadow-[0_0_40px_rgba(34,197,94,0.35)] group"
-              title="Clique para adicionar a primeira atividade"
-            >
-              {/* Subtle pulsing background glow */}
-              <div className="absolute inset-0 rounded-full bg-emerald-500/5 group-hover:bg-emerald-500/10 transition-colors pointer-events-none" />
-
-              {/* Top tag */}
-              <span className="text-[10px] font-mono text-emerald-400/90 font-bold tracking-widest uppercase mb-1">
-                JORNADA
-              </span>
-
-              {/* Center bold title */}
-              <span className="text-sm sm:text-base font-black uppercase tracking-wider text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                COMEÇAR
-              </span>
-
-              {/* Bottom cue */}
-              <div className="mt-1 flex items-center gap-1 text-[10px] font-mono text-emerald-400 font-semibold bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                <Plus className="w-3 h-3 stroke-[3]" />
-                <span>CRIAR</span>
-              </div>
-            </motion.button>
-          </div>
-
-          {/* Road connector leading to context card */}
-          <div className="flex flex-col items-center h-10 w-full justify-center">
-            <div className="w-[4px] h-full rounded-full bg-gradient-to-b from-[#252A33] to-[#181C26]" />
-          </div>
-
-          {/* Contextual guidance card: "Vamos montar seu dia" */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="w-full max-w-sm rounded-2xl bg-[#13161D] border border-[#252A33] p-5 sm:p-6 text-center shadow-xl flex flex-col items-center"
-          >
-            <h3 className="text-base sm:text-lg font-bold text-white mb-1.5 tracking-tight">
-              Vamos montar seu dia.
-            </h3>
-            <p className="text-xs sm:text-sm text-[#8B919E] mb-5 leading-relaxed">
-              Adicione sua primeira atividade para começar sua jornada. Cada bolinha será uma etapa do seu dia.
-            </p>
-
-            {/* Big Primary Action Button */}
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => onNewActivity()}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-black font-mono font-bold text-xs sm:text-sm tracking-wider transition-all shadow-[0_0_20px_rgba(34,197,94,0.35)] cursor-pointer"
-            >
-              <Plus className="w-4 h-4 stroke-[3]" />
-              <span>+ NOVA ATIVIDADE</span>
-            </motion.button>
-
-            {/* Suggestions / inspiration placeholders */}
-            <div className="w-full mt-5 pt-4 border-t border-[#252A33]">
-              <span className="block text-[10px] font-mono text-[#6A7280] uppercase tracking-wider mb-2.5">
-                OU ESCOLHA UMA ETAPA COMUM PARA INICIAR:
-              </span>
-              <div className="flex flex-wrap items-center justify-center gap-1.5">
-                {suggestions.map((item) => (
-                  <button
-                    key={item.title}
-                    onClick={() => onNewActivity(item.title)}
-                    className="px-2.5 py-1 rounded-lg bg-[#181C26] hover:bg-[#202533] border border-[#252A33] hover:border-emerald-500/40 text-xs font-mono text-[#D0D4DC] hover:text-emerald-400 transition-all cursor-pointer flex items-center gap-1"
-                  >
-                    <span>{item.title}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Optional preview sample routine */}
-            {onLoadSample && (
-              <button
-                onClick={onLoadSample}
-                className="mt-4 text-[11px] font-mono text-[#6A7280] hover:text-[#8B919E] underline underline-offset-4 transition-colors cursor-pointer"
-              >
-                Preencher com rotina de demonstração
-              </button>
-            )}
-          </motion.div>
-        </div>
-      </div>
-    );
-  }
-
-  // ==========================================
-  // JORNADA COM ATIVIDADES
-  // ==========================================
-  const allCompleted = activities.length > 0 && activities.every((a) => a.completed);
-
-  // Gentle horizontal offsets for the organic winding journey trail
-  const getOffset = (index: number) => {
-    if (!isCurvedTrail) return 0;
-    const offsets = [24, -28, 26, -24, 18, -20, 15];
-    return offsets[index % offsets.length];
+  // Group activities by starting hour
+  const getActivitiesForHour = (h: number): Activity[] => {
+    return activities
+      .filter((a) => {
+        const actHour = parseInt(a.startTime.split(':')[0], 10);
+        return actHour === h;
+      })
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto px-3 sm:px-4 pb-24 select-none">
-      {/* Top Trail Controls: Start Marker + Trail Mode Switcher */}
-      <div className="flex items-center justify-between pt-1 pb-4 px-2">
-        {/* Journey Start Marker */}
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#13161D] border border-[#252A33] text-[10px] font-mono text-[#8B919E] uppercase tracking-wider shadow-sm">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#22C55E]" />
-          <span>INÍCIO DA JORNADA</span>
-        </div>
+    <div
+      ref={containerRef}
+      className="w-full flex-1 min-h-0 overflow-y-auto overscroll-contain select-none pb-28 pt-2"
+      style={{ WebkitOverflowScrolling: 'touch' }}
+    >
+      <div className="w-full max-w-lg mx-auto px-3 sm:px-4">
+        {/* 24-Hour Vertical Continuous Journey */}
+        <div className="relative py-3">
+        {/* Continuous central spine line */}
+        <div
+          className="absolute left-[3.25rem] sm:left-[3.75rem] top-6 bottom-6 w-[2px] bg-[#1F242E] pointer-events-none"
+          aria-hidden="true"
+        />
 
-        {/* Trail Layout Style Switcher (Curva / Reta) */}
-        <button
-          onClick={() => setIsCurvedTrail((prev) => !prev)}
-          title="Alternar estilo visual da trilha"
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#13161D] hover:bg-[#181C26] border border-[#252A33] text-[10px] font-mono text-[#8B919E] hover:text-white transition-all cursor-pointer"
-        >
-          <Compass className="w-3 h-3 text-emerald-400" />
-          <span>{isCurvedTrail ? 'TRILHA ORGÂNICA' : 'TRILHA RETA'}</span>
-        </button>
-      </div>
+        {hours.map((hour, index) => {
+          const hourStr = `${String(hour).padStart(2, '0')}:00`;
+          const hourActivities = getActivitiesForHour(hour);
+          const hasActivities = hourActivities.length > 0;
+          const isCurrentHour = isToday && hour === currentHour;
 
-      {/* Main Visual Journey Track */}
-      <div className="relative flex flex-col items-center w-full py-2">
-        {/* Initial lead-in road connector */}
-        <div className="flex flex-col items-center h-8 w-full justify-center">
-          <div
-            className={`w-[4px] h-full rounded-full transition-all duration-500 ${
-              activities[0]?.completed
-                ? 'bg-emerald-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]'
-                : 'bg-[#252A33]'
-            }`}
-          />
-        </div>
-
-        {activities.map((activity, index) => {
-          const isCompleted = activity.completed;
-          const isNext = activity.id === nextActivityId && !isCompleted;
-          const isLast = index === activities.length - 1;
-          const timePast = !isCompleted && isTimeInPast(activity.startTime);
-
-          const currentOffset = getOffset(index);
-          const nextOffset = !isLast ? getOffset(index + 1) : 0;
-
-          // Road connector status to next node
-          const isLineToNextActive = isCompleted;
+          // Check if any activity in this hour is next or completed
+          const hasNextActivity = hourActivities.some(
+            (a) => a.id === nextActivityId && !a.completed
+          );
+          const allCompletedInHour =
+            hasActivities && hourActivities.every((a) => a.completed);
+          const someCompleted =
+            hasActivities && hourActivities.some((a) => a.completed);
 
           return (
-            <div key={activity.id} className="w-full flex flex-col items-center">
-              {/* NODE CONTAINER */}
+            <div
+              key={hour}
+              ref={isCurrentHour ? currentHourRef : undefined}
+              className={`relative flex items-start gap-2.5 sm:gap-3 py-1.5 sm:py-2 transition-colors rounded-xl ${
+                isCurrentHour ? 'bg-emerald-500/[0.03]' : ''
+              }`}
+            >
+              {/* 1. Left Time Label (discreet, monospace, structural reference) */}
               <div
-                className="relative z-20 flex flex-col items-center transition-transform duration-500 ease-out"
-                style={{
-                  transform: `translateX(${currentOffset}px)`,
-                }}
+                onClick={() => !hasActivities && onNewActivity(undefined, hourStr)}
+                className={`w-11 sm:w-13 shrink-0 pt-1 text-right font-mono text-[11px] sm:text-xs transition-colors cursor-pointer select-none ${
+                  isCurrentHour
+                    ? 'text-emerald-400 font-bold'
+                    : 'text-[#6F7684] hover:text-[#9EA4B0]'
+                }`}
+                title={`Criar atividade às ${hourStr}`}
               >
-                {/* Active Indicator Floating Badge above the node */}
-                {isNext && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -6, scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    className="mb-2 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-[10px] font-mono font-bold tracking-widest uppercase shadow-[0_0_12px_rgba(34,197,94,0.25)]"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                    <span>PRÓXIMO PASSO</span>
-                  </motion.div>
+                <span>{hourStr}</span>
+                {isCurrentHour && (
+                  <span className="block text-[9px] tracking-wider text-emerald-400 font-bold uppercase leading-none mt-0.5">
+                    AGORA
+                  </span>
                 )}
+              </div>
 
-                {/* THE LARGE ACTIVITY NODE (Bolinha com título dentro) */}
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => onOpenDetail(activity)}
-                  title="Toque para ver detalhes da etapa"
-                  className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-full flex flex-col items-center justify-between p-2.5 sm:p-3 cursor-pointer transition-all duration-300 border-2 select-none group ${
-                    isCompleted
-                      ? 'bg-[#0b1f14] border-emerald-500 text-emerald-300 shadow-[0_0_24px_rgba(34,197,94,0.35)] hover:border-emerald-400'
-                      : isNext
-                      ? 'bg-[#13161D] border-emerald-400 text-white shadow-[0_0_35px_rgba(34,197,94,0.4)] ring-4 ring-emerald-500/25 ring-offset-2 ring-offset-[#0B0D12]'
-                      : 'bg-[#13161D] border-[#252A33] text-[#D0D4DC] shadow-lg shadow-black/40 hover:border-[#3B4252] hover:bg-[#181C26]'
-                  }`}
-                >
-                  {/* Top: Time in crisp monospace font */}
-                  <div className="flex items-center gap-1">
-                    <span
-                      className={`text-[10px] sm:text-[11px] font-mono font-bold tracking-wider ${
-                        isNext
-                          ? 'text-emerald-400'
-                          : isCompleted
-                          ? 'text-emerald-400/90'
-                          : 'text-[#8B919E] group-hover:text-white transition-colors'
-                      }`}
-                    >
-                      {activity.startTime}
-                    </span>
-                  </div>
-
-                  {/* Center: Main Activity Title (Inside the Node) */}
-                  <div className="w-full flex-1 flex items-center justify-center px-1 text-center min-w-0">
-                    <span
-                      className={`font-black uppercase tracking-tight line-clamp-2 leading-tight ${
-                        activity.title.length > 9
-                          ? 'text-[11px] sm:text-xs font-extrabold'
-                          : 'text-xs sm:text-sm'
-                      } ${
-                        isNext
-                          ? 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]'
-                          : isCompleted
-                          ? 'text-emerald-100 font-bold'
-                          : 'text-[#D0D4DC] group-hover:text-white transition-colors'
-                      }`}
-                    >
-                      {activity.title}
-                    </span>
-                  </div>
-
-                  {/* Bottom: Status Pill / Indicator inside node */}
-                  <div className="mt-0.5 flex items-center justify-center">
-                    {isCompleted ? (
-                      <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[9px] font-mono font-semibold">
-                        <Check className="w-3 h-3 stroke-[3] text-emerald-400" />
-                        <span>FEITO</span>
-                      </div>
-                    ) : isNext ? (
-                      <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] font-mono font-bold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        <span>AGORA</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1 text-[10px] font-mono text-[#6A7280] group-hover:text-[#8B919E] transition-colors">
-                        <span className="w-1 h-1 rounded-full bg-[#3B4252]" />
-                        <span className="text-[9px]">ETAPA</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Quick-toggle action target on top-right badge */}
+              {/* 2. Center Node / Bolinha (24 points along the spine) */}
+              <div className="relative z-10 flex items-center justify-center shrink-0 w-6 pt-1">
+                {hasActivities ? (
+                  /* Active Hour Node */
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggleComplete(activity.id, e);
+                    onClick={() => {
+                      if (hourActivities.length === 1) {
+                        onOpenDetail(hourActivities[0]);
+                      }
                     }}
-                    title={isCompleted ? 'Reabrir etapa' : 'Marcar como concluída'}
-                    className={`absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border transition-all duration-200 cursor-pointer ${
-                      isCompleted
-                        ? 'bg-emerald-500 border-emerald-400 text-[#0B0D12] shadow-[0_0_8px_rgba(34,197,94,0.6)] hover:scale-110'
-                        : isNext
-                        ? 'bg-[#181C26] border-emerald-400/80 text-emerald-400 hover:bg-emerald-500 hover:text-[#0B0D12] hover:scale-110'
-                        : 'bg-[#181C26] border-[#252A33] text-[#8B919E] hover:border-emerald-500 hover:text-emerald-400 hover:scale-110'
+                    className={`rounded-full transition-all flex items-center justify-center cursor-pointer ${
+                      allCompletedInHour
+                        ? 'w-5 h-5 sm:w-5.5 sm:h-5.5 bg-emerald-500 border border-emerald-400 text-[#0B0D12] shadow-[0_0_12px_rgba(34,197,94,0.45)]'
+                        : hasNextActivity
+                        ? 'w-5 h-5 sm:w-5.5 sm:h-5.5 bg-[#13161D] border-2 border-emerald-400 text-emerald-400 ring-4 ring-emerald-500/25 shadow-[0_0_16px_rgba(34,197,94,0.35)]'
+                        : someCompleted
+                        ? 'w-4 h-4 sm:w-4.5 sm:h-4.5 bg-emerald-500/80 border border-emerald-400 text-[#0B0D12]'
+                        : 'w-4 h-4 sm:w-4.5 sm:h-4.5 bg-[#13161D] border-2 border-[#4A5263] hover:border-emerald-400'
                     }`}
+                    title={`${hourActivities.length} atividade(s) às ${hourStr}`}
                   >
-                    {isCompleted ? (
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    {allCompletedInHour ? (
+                      <Check className="w-3 h-3 stroke-[3]" />
+                    ) : hasNextActivity ? (
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                     ) : (
-                      <span className="w-2 h-2 rounded-full border border-current" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
                     )}
                   </button>
-                </motion.div>
-
-                {/* ACTIVE STEP ACTIONS: One-click Advance Button & Live Timer */}
-                {isNext && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-2.5 flex flex-col items-center gap-1.5 z-30"
-                  >
-                    {/* Friendly gentle encouragement if time passed (No aggressive penalty) */}
-                    {timePast && (
-                      <div className="text-[10px] font-mono text-[#A0A5B0] bg-[#181C26] px-2.5 py-0.5 rounded-full border border-[#252A33] mb-1">
-                        Você pode continuar daqui
-                      </div>
-                    )}
-
-                    {/* Quick Complete Action Button */}
-                    <motion.button
-                      whileHover={{ scale: 1.04 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleComplete(activity.id, e);
-                      }}
-                      className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-[#0B0D12] text-xs font-mono font-bold tracking-wider transition-all shadow-[0_0_18px_rgba(34,197,94,0.4)] cursor-pointer"
-                    >
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
-                      <span>CONCLUIR PASSO</span>
-                      <span className="hidden sm:inline opacity-70 text-[10px] font-normal">
-                        (ESPAÇO)
-                      </span>
-                    </motion.button>
-
-                    {/* Live Stopwatch & Moment Peek Trigger */}
-                    <div className="flex items-center gap-2 text-[10px] font-mono text-[#8B919E]">
-                      <span className="flex items-center gap-1 text-emerald-400/90 font-semibold">
-                        <Clock className="w-3 h-3 text-emerald-400" />
-                        {formatTimer(secondsElapsed)}
-                      </span>
-                      <span>•</span>
-                      <button
-                        onClick={() => onOpenDetail(activity)}
-                        className="hover:text-white underline underline-offset-2 transition-colors cursor-pointer"
-                      >
-                        Ver detalhes
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Subtitle / hint on completed nodes */}
-                {isCompleted && (
+                ) : (
+                  /* Empty Hour Node (hollow circle ○, interactive) */
                   <button
-                    onClick={() => onOpenDetail(activity)}
-                    className="mt-1.5 text-[10px] font-mono text-[#8B919E] hover:text-emerald-300 transition-colors flex items-center gap-1 cursor-pointer"
+                    onClick={() => onNewActivity(undefined, hourStr)}
+                    title={`Adicionar atividade às ${hourStr}`}
+                    className={`w-3.5 h-3.5 rounded-full border bg-[#0B0D12] transition-all hover:scale-130 active:scale-95 cursor-pointer group flex items-center justify-center ${
+                      isCurrentHour
+                        ? 'border-emerald-400/80 bg-emerald-500/20 shadow-[0_0_8px_rgba(34,197,94,0.4)]'
+                        : 'border-[#2D333F] hover:border-emerald-400 hover:bg-[#181C26]'
+                    }`}
+                    aria-label={`Adicionar atividade às ${hourStr}`}
                   >
-                    <span>{activity.completedAt ? `Concluído ${activity.completedAt}` : 'Concluído'}</span>
-                    <ChevronRight className="w-2.5 h-2.5 opacity-60" />
-                  </button>
-                )}
-
-                {/* Hint on pending nodes */}
-                {!isCompleted && !isNext && (
-                  <button
-                    onClick={() => onOpenDetail(activity)}
-                    className="mt-1 text-[10px] font-mono text-[#6A7280] hover:text-[#C5CAD3] transition-colors flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>Toque para detalhes</span>
+                    <span className="w-1 h-1 rounded-full bg-transparent group-hover:bg-emerald-400 transition-colors" />
                   </button>
                 )}
               </div>
 
-              {/* ROAD CONNECTOR TO NEXT NODE */}
-              {!isLast && (
-                <div className="w-full flex items-center justify-center my-1 pointer-events-none">
-                  {isCurvedTrail ? (
-                    <svg
-                      className="w-48 h-14 overflow-visible"
-                      viewBox="0 0 192 56"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      {/* Background Road Track */}
-                      <path
-                        d={`M ${96 + currentOffset} 0 C ${96 + currentOffset} 28, ${
-                          96 + nextOffset
-                        } 28, ${96 + nextOffset} 56`}
-                        stroke="#252A33"
-                        strokeWidth="4"
-                        strokeLinecap="round"
-                      />
-                      {/* Dashed Center Guide Line */}
-                      <path
-                        d={`M ${96 + currentOffset} 0 C ${96 + currentOffset} 28, ${
-                          96 + nextOffset
-                        } 28, ${96 + nextOffset} 56`}
-                        stroke="#181C26"
-                        strokeWidth="1.5"
-                        strokeDasharray="3 4"
-                        strokeLinecap="round"
-                      />
-                      {/* Luminous Active Completed Path */}
-                      {isLineToNextActive && (
-                        <path
-                          d={`M ${96 + currentOffset} 0 C ${96 + currentOffset} 28, ${
-                            96 + nextOffset
-                          } 28, ${96 + nextOffset} 56`}
-                          stroke="#22C55E"
-                          strokeWidth="4"
-                          strokeLinecap="round"
-                          className="transition-all duration-700"
-                          style={{
-                            filter: 'drop-shadow(0 0 6px rgba(34, 197, 94, 0.7))',
-                          }}
-                        />
-                      )}
-                    </svg>
-                  ) : (
-                    <div className="flex flex-col items-center h-12 w-full justify-center">
-                      <div
-                        className={`w-[4px] h-full rounded-full transition-all duration-500 ${
-                          isLineToNextActive
-                            ? 'bg-emerald-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]'
-                            : 'bg-[#252A33]'
-                        }`}
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
+              {/* 3. Right Content Area (Activity cards or interactive empty slot) */}
+              <div className="flex-1 min-w-0 min-h-[36px] sm:min-h-[40px] flex flex-col justify-center">
+                {hasActivities ? (
+                  /* Stack of activities in this hour */
+                  <div className="space-y-2 w-full">
+                    {hourActivities.map((act) => {
+                      const isCompleted = act.completed;
+                      const isNext = act.id === nextActivityId && !isCompleted;
+
+                      return (
+                        <motion.div
+                          key={act.id}
+                          layout
+                          onClick={() => onOpenDetail(act)}
+                          className={`group w-full p-2.5 sm:p-3 rounded-xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-2.5 ${
+                            isCompleted
+                              ? 'bg-[#0f1713]/80 border-emerald-900/60 text-[#A0A8B8] hover:border-emerald-700/60'
+                              : isNext
+                              ? 'bg-[#13161D] border-emerald-500/80 shadow-[0_0_20px_rgba(34,197,94,0.15)] ring-1 ring-emerald-500/30 text-white'
+                              : 'bg-[#13161D] border-[#252A33] hover:border-[#3B4252] hover:bg-[#181C26] text-[#E2E6EE]'
+                          }`}
+                        >
+                          {/* Left: Check toggle + Title + Time */}
+                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onToggleComplete(act.id, e);
+                              }}
+                              title={
+                                isCompleted
+                                  ? 'Reabrir atividade'
+                                  : 'Concluir atividade'
+                              }
+                              className={`w-5 h-5 rounded-md flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+                                isCompleted
+                                  ? 'bg-emerald-500 text-[#0B0D12] shadow-[0_0_8px_rgba(34,197,94,0.4)]'
+                                  : isNext
+                                  ? 'border-2 border-emerald-400 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500 hover:text-[#0B0D12]'
+                                  : 'border border-[#3B4252] text-transparent hover:border-emerald-400 hover:text-emerald-400'
+                              }`}
+                              aria-label={
+                                isCompleted
+                                  ? 'Marcar como não concluída'
+                                  : 'Marcar como concluída'
+                              }
+                            >
+                              {isCompleted && (
+                                <Check className="w-3.5 h-3.5 stroke-[3]" />
+                              )}
+                            </button>
+
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              <span
+                                className={`text-xs sm:text-sm font-semibold truncate ${
+                                  isCompleted
+                                    ? 'line-through text-[#6F7684]'
+                                    : isNext
+                                    ? 'text-white'
+                                    : 'text-[#E2E6EE]'
+                                }`}
+                              >
+                                {act.title}
+                              </span>
+
+                              {isNext && (
+                                <span className="hidden xs:inline-flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold shrink-0">
+                                  FOCO
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Right: Exact Time & Duration */}
+                          <div className="flex items-center gap-1.5 shrink-0 text-[11px] font-mono">
+                            <span
+                              className={`${
+                                isNext
+                                  ? 'text-emerald-400 font-bold'
+                                  : isCompleted
+                                  ? 'text-[#6F7684]'
+                                  : 'text-[#8B919E]'
+                              }`}
+                            >
+                              {act.startTime}
+                              {act.endTime ? ` – ${act.endTime}` : ''}
+                            </span>
+
+                            {act.category && (
+                              <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] bg-[#181C26] text-[#8B919E] border border-[#252A33]">
+                                {act.category}
+                              </span>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  /* Empty Hour Slot: clean, subtle, click to add */
+                  <div
+                    onClick={() => onNewActivity(undefined, hourStr)}
+                    className="w-full py-1.5 px-2 rounded-lg hover:bg-[#13161D]/60 transition-all cursor-pointer group flex items-center justify-between"
+                  >
+                    <span className="text-[11px] font-mono text-transparent group-hover:text-[#6F7684] transition-colors flex items-center gap-1">
+                      <Plus className="w-3 h-3 text-emerald-400/80" />
+                      <span>Adicionar às {hourStr}</span>
+                    </span>
+
+                    <span className="text-[10px] font-mono text-[#252A33] group-hover:text-emerald-500/60 transition-colors">
+                      +
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}
-
-        {/* ======================================================== */}
-        {/* CONDICIONAL: CONDUZIR O USUÁRIO APÓS CRIAR ATIVIDADE(S) */}
-        {/* ======================================================== */}
-
-        {/* Connector from last activity down to Add Next / Final Marker */}
-        <div className="flex flex-col items-center h-8 w-full justify-center">
-          <div
-            className={`w-[4px] h-full rounded-full transition-all duration-500 ${
-              allCompleted
-                ? 'bg-emerald-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]'
-                : 'bg-[#252A33]'
-            }`}
-          />
-        </div>
-
-        {/* If user has 1 activity: show gentle contextual guidance banner */}
-        {activities.length === 1 && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="my-3 max-w-xs text-center px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono"
-          >
-            Sua primeira etapa está pronta! Adicione outras atividades para montar seu dia.
-          </motion.div>
-        )}
-
-        {/* "ADICIONAR OUTRA ETAPA" GHOST / DASHED NODE ON THE ROAD */}
-        <div className="relative z-20 flex flex-col items-center my-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => onNewActivity()}
-            className="w-20 h-20 sm:w-22 sm:h-22 rounded-full border-2 border-dashed border-[#3B4252] hover:border-emerald-400 bg-[#13161D]/70 hover:bg-[#181C26] flex flex-col items-center justify-center p-2 text-center text-[#8B919E] hover:text-emerald-400 transition-all cursor-pointer group shadow-md"
-            title="Adicionar outra atividade na sequência"
-          >
-            <Plus className="w-4 h-4 mb-0.5 stroke-[2.5] text-emerald-500/70 group-hover:text-emerald-400 transition-colors" />
-            <span className="text-[9px] sm:text-[10px] font-mono font-bold uppercase leading-tight">
-              {activities.length === 1 ? 'ADICIONAR OUTRA' : 'NOVA ETAPA'}
-            </span>
-          </motion.button>
-        </div>
-
-        {/* Final Journey Milestone Marker */}
-        <div className="w-full flex flex-col items-center pt-2">
-          {/* Small connector */}
-          <div className="flex flex-col items-center h-6 w-full justify-center">
-            <div
-              className={`w-[4px] h-full rounded-full transition-all duration-500 ${
-                allCompleted
-                  ? 'bg-emerald-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]'
-                  : 'bg-[#252A33]'
-              }`}
-            />
-          </div>
-
-          <motion.div
-            layout
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono border transition-all shadow-md ${
-              allCompleted
-                ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-[0_0_20px_rgba(34,197,94,0.25)]'
-                : 'bg-[#13161D] border-[#252A33] text-[#8B919E]'
-            }`}
-          >
-            {allCompleted ? (
-              <>
-                <Sparkles className="w-4 h-4 text-emerald-400 animate-spin" style={{ animationDuration: '6s' }} />
-                <span className="font-bold tracking-wider">FASE COMPLETA // PARABÉNS!</span>
-              </>
-            ) : (
-              <>
-                <span className="w-2 h-2 rounded-full bg-[#252A33]" />
-                <span>CICLO DA JORNADA</span>
-              </>
-            )}
-          </motion.div>
-        </div>
+      </div>
       </div>
     </div>
   );

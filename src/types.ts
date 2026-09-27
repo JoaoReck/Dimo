@@ -12,7 +12,7 @@ export interface Activity {
 
 export type ViewMode = 'timeline' | 'checklist' | 'calendar';
 
-export type DayOffset = -1 | 0 | 1;
+export type DayOffset = number;
 
 export interface DayInfo {
   offset: DayOffset;
