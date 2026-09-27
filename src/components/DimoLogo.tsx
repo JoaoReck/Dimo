@@ -9,12 +9,12 @@ export const DimoLogo: React.FC<DimoLogoProps> = ({ compact = false, className =
   return (
     <div className={`flex items-center gap-2.5 select-none ${className}`}>
       {/* Icon Mark: Timeline node + continuous cycle path forming 'D' */}
-      <div className="relative w-8 h-8 rounded-xl bg-gradient-to-b from-[#181C26] to-[#12151D] border border-emerald-500/30 flex items-center justify-center shadow-[0_0_12px_rgba(34,197,94,0.15)] shrink-0 group">
+      <div className="relative w-8 h-8 rounded-xl bg-[#EDE8D0] border border-[#C4C0AB] flex items-center justify-center shadow-[0_2px_8px_rgba(20,20,16,0.06)] shrink-0 group">
         <svg
           viewBox="0 0 32 32"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-5 h-5 text-emerald-400"
+          className="w-5 h-5 text-[#141410]"
         >
           {/* Vertical timeline spine */}
           <line
@@ -35,7 +35,7 @@ export const DimoLogo: React.FC<DimoLogoProps> = ({ compact = false, className =
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-emerald-400"
+            className="text-[#141410]"
           />
 
           {/* Active Waypoint Node along the timeline spine */}
@@ -43,13 +43,13 @@ export const DimoLogo: React.FC<DimoLogoProps> = ({ compact = false, className =
             cx="10"
             cy="16"
             r="3.5"
-            className="fill-emerald-400"
+            className="fill-[#141410]"
           />
           <circle
             cx="10"
             cy="16"
             r="5"
-            className="stroke-emerald-300 stroke-[1.2] opacity-50 animate-pulse"
+            className="stroke-[#777567] stroke-[1.2] opacity-50"
           />
         </svg>
       </div>
@@ -58,12 +58,12 @@ export const DimoLogo: React.FC<DimoLogoProps> = ({ compact = false, className =
       {!compact && (
         <div className="flex flex-col leading-none">
           <div className="flex items-center gap-1.5">
-            <span className="font-bold tracking-[0.22em] text-base text-white font-sans">
+            <span className="font-bold tracking-[0.22em] text-base text-[#141410] font-sans">
               DIMO
             </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#22C55E]" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#141410]" />
           </div>
-          <span className="text-[9px] font-mono tracking-widest text-[#8B919E] uppercase mt-0.5">
+          <span className="text-[9px] font-mono tracking-widest text-[#777567] uppercase mt-0.5">
             JORNADA DIÁRIA
           </span>
         </div>

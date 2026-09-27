@@ -95,7 +95,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         <div className="relative py-3">
         {/* Continuous central spine line */}
         <div
-          className="absolute left-[3.25rem] sm:left-[3.75rem] top-6 bottom-6 w-[2px] bg-[#1F242E] pointer-events-none"
+          className="absolute left-[3.25rem] sm:left-[3.75rem] top-6 bottom-6 w-[2px] bg-[#C4C0AB] pointer-events-none"
           aria-hidden="true"
         />
 
@@ -119,7 +119,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               key={hour}
               ref={isCurrentHour ? currentHourRef : undefined}
               className={`relative flex items-start gap-2.5 sm:gap-3 py-1.5 sm:py-2 transition-colors rounded-xl ${
-                isCurrentHour ? 'bg-emerald-500/[0.03]' : ''
+                isCurrentHour ? 'bg-[#C4C0AB]/25' : ''
               }`}
             >
               {/* 1. Left Time Label (discreet, monospace, structural reference) */}
@@ -127,14 +127,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 onClick={() => !hasActivities && onNewActivity(undefined, hourStr)}
                 className={`w-11 sm:w-13 shrink-0 pt-1 text-right font-mono text-[11px] sm:text-xs transition-colors cursor-pointer select-none ${
                   isCurrentHour
-                    ? 'text-emerald-400 font-bold'
-                    : 'text-[#6F7684] hover:text-[#9EA4B0]'
+                    ? 'text-[#141410] font-bold'
+                    : 'text-[#777567] hover:text-[#33312B]'
                 }`}
                 title={`Criar atividade às ${hourStr}`}
               >
                 <span>{hourStr}</span>
                 {isCurrentHour && (
-                  <span className="block text-[9px] tracking-wider text-emerald-400 font-bold uppercase leading-none mt-0.5">
+                  <span className="block text-[9px] tracking-wider text-[#141410] font-bold uppercase leading-none mt-0.5">
                     AGORA
                   </span>
                 )}
@@ -152,19 +152,19 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                     }}
                     className={`rounded-full transition-all flex items-center justify-center cursor-pointer ${
                       allCompletedInHour
-                        ? 'w-5 h-5 sm:w-5.5 sm:h-5.5 bg-emerald-500 border border-emerald-400 text-[#0B0D12] shadow-[0_0_12px_rgba(34,197,94,0.45)]'
+                        ? 'w-5 h-5 sm:w-5.5 sm:h-5.5 bg-[#141410] border border-[#141410] text-[#EDE8D0] shadow-[0_2px_8px_rgba(20,20,16,0.25)]'
                         : hasNextActivity
-                        ? 'w-5 h-5 sm:w-5.5 sm:h-5.5 bg-[#13161D] border-2 border-emerald-400 text-emerald-400 ring-4 ring-emerald-500/25 shadow-[0_0_16px_rgba(34,197,94,0.35)]'
+                        ? 'w-5 h-5 sm:w-5.5 sm:h-5.5 bg-[#FAF8F0] border-2 border-[#141410] text-[#141410] ring-4 ring-[#C4C0AB] shadow-[0_2px_10px_rgba(20,20,16,0.12)]'
                         : someCompleted
-                        ? 'w-4 h-4 sm:w-4.5 sm:h-4.5 bg-emerald-500/80 border border-emerald-400 text-[#0B0D12]'
-                        : 'w-4 h-4 sm:w-4.5 sm:h-4.5 bg-[#13161D] border-2 border-[#4A5263] hover:border-emerald-400'
+                        ? 'w-4 h-4 sm:w-4.5 sm:h-4.5 bg-[#545248] border border-[#33312B] text-[#EDE8D0]'
+                        : 'w-4 h-4 sm:w-4.5 sm:h-4.5 bg-[#FAF8F0] border-2 border-[#777567] hover:border-[#141410]'
                     }`}
                     title={`${hourActivities.length} atividade(s) às ${hourStr}`}
                   >
                     {allCompletedInHour ? (
                       <Check className="w-3 h-3 stroke-[3]" />
                     ) : hasNextActivity ? (
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="w-2 h-2 rounded-full bg-[#141410] animate-pulse" />
                     ) : (
                       <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
                     )}
@@ -174,14 +174,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   <button
                     onClick={() => onNewActivity(undefined, hourStr)}
                     title={`Adicionar atividade às ${hourStr}`}
-                    className={`w-3.5 h-3.5 rounded-full border bg-[#0B0D12] transition-all hover:scale-130 active:scale-95 cursor-pointer group flex items-center justify-center ${
+                    className={`w-3.5 h-3.5 rounded-full border bg-[#EDE8D0] transition-all hover:scale-125 active:scale-95 cursor-pointer group flex items-center justify-center ${
                       isCurrentHour
-                        ? 'border-emerald-400/80 bg-emerald-500/20 shadow-[0_0_8px_rgba(34,197,94,0.4)]'
-                        : 'border-[#2D333F] hover:border-emerald-400 hover:bg-[#181C26]'
+                        ? 'border-[#141410] bg-[#C4C0AB] ring-2 ring-[#33312B]/20'
+                        : 'border-[#9D9988] hover:border-[#141410] hover:bg-[#C4C0AB]'
                     }`}
                     aria-label={`Adicionar atividade às ${hourStr}`}
                   >
-                    <span className="w-1 h-1 rounded-full bg-transparent group-hover:bg-emerald-400 transition-colors" />
+                    <span className="w-1 h-1 rounded-full bg-transparent group-hover:bg-[#141410] transition-colors" />
                   </button>
                 )}
               </div>
@@ -202,10 +202,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                           onClick={() => onOpenDetail(act)}
                           className={`group w-full p-2.5 sm:p-3 rounded-xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-2.5 ${
                             isCompleted
-                              ? 'bg-[#0f1713]/80 border-emerald-900/60 text-[#A0A8B8] hover:border-emerald-700/60'
+                              ? 'bg-[#FAF8F0]/70 border-[#C4C0AB] text-[#777567] hover:border-[#9D9988]'
                               : isNext
-                              ? 'bg-[#13161D] border-emerald-500/80 shadow-[0_0_20px_rgba(34,197,94,0.15)] ring-1 ring-emerald-500/30 text-white'
-                              : 'bg-[#13161D] border-[#252A33] hover:border-[#3B4252] hover:bg-[#181C26] text-[#E2E6EE]'
+                              ? 'bg-[#FAF8F0] border-2 border-[#141410] shadow-[0_4px_16px_rgba(20,20,16,0.08)] ring-1 ring-[#141410]/20 text-[#141410]'
+                              : 'bg-[#FAF8F0] border border-[#C4C0AB] hover:border-[#9D9988] hover:bg-white text-[#33312B] shadow-[0_2px_6px_rgba(20,20,16,0.03)]'
                           }`}
                         >
                           {/* Left: Check toggle + Title + Time */}
@@ -223,10 +223,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                               }
                               className={`w-5 h-5 rounded-md flex items-center justify-center transition-all shrink-0 cursor-pointer ${
                                 isCompleted
-                                  ? 'bg-emerald-500 text-[#0B0D12] shadow-[0_0_8px_rgba(34,197,94,0.4)]'
+                                  ? 'bg-[#141410] text-[#EDE8D0] shadow-[0_2px_6px_rgba(20,20,16,0.2)]'
                                   : isNext
-                                  ? 'border-2 border-emerald-400 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500 hover:text-[#0B0D12]'
-                                  : 'border border-[#3B4252] text-transparent hover:border-emerald-400 hover:text-emerald-400'
+                                  ? 'border-2 border-[#141410] text-[#141410] bg-[#C4C0AB]/40 hover:bg-[#141410] hover:text-[#EDE8D0]'
+                                  : 'border border-[#9D9988] text-transparent hover:border-[#141410] hover:text-[#141410]'
                               }`}
                               aria-label={
                                 isCompleted
@@ -243,17 +243,17 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                               <span
                                 className={`text-xs sm:text-sm font-semibold truncate ${
                                   isCompleted
-                                    ? 'line-through text-[#6F7684]'
+                                    ? 'line-through text-[#777567]'
                                     : isNext
-                                    ? 'text-white'
-                                    : 'text-[#E2E6EE]'
+                                    ? 'text-[#141410] font-bold'
+                                    : 'text-[#33312B]'
                                 }`}
                               >
                                 {act.title}
                               </span>
 
                               {isNext && (
-                                <span className="hidden xs:inline-flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold shrink-0">
+                                <span className="hidden xs:inline-flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#141410] text-[#EDE8D0] border border-[#141410] font-bold shrink-0">
                                   FOCO
                                 </span>
                               )}
@@ -265,10 +265,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                             <span
                               className={`${
                                 isNext
-                                  ? 'text-emerald-400 font-bold'
+                                  ? 'text-[#141410] font-bold'
                                   : isCompleted
-                                  ? 'text-[#6F7684]'
-                                  : 'text-[#8B919E]'
+                                  ? 'text-[#777567]'
+                                  : 'text-[#545248]'
                               }`}
                             >
                               {act.startTime}
@@ -276,7 +276,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                             </span>
 
                             {act.category && (
-                              <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] bg-[#181C26] text-[#8B919E] border border-[#252A33]">
+                              <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] bg-[#EDE8D0] text-[#545248] border border-[#C4C0AB]">
                                 {act.category}
                               </span>
                             )}
@@ -289,14 +289,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   /* Empty Hour Slot: clean, subtle, click to add */
                   <div
                     onClick={() => onNewActivity(undefined, hourStr)}
-                    className="w-full py-1.5 px-2 rounded-lg hover:bg-[#13161D]/60 transition-all cursor-pointer group flex items-center justify-between"
+                    className="w-full py-1.5 px-2 rounded-lg hover:bg-[#C4C0AB]/30 transition-all cursor-pointer group flex items-center justify-between"
                   >
-                    <span className="text-[11px] font-mono text-transparent group-hover:text-[#6F7684] transition-colors flex items-center gap-1">
-                      <Plus className="w-3 h-3 text-emerald-400/80" />
+                    <span className="text-[11px] font-mono text-transparent group-hover:text-[#777567] transition-colors flex items-center gap-1">
+                      <Plus className="w-3 h-3 text-[#545248]" />
                       <span>Adicionar às {hourStr}</span>
                     </span>
 
-                    <span className="text-[10px] font-mono text-[#252A33] group-hover:text-emerald-500/60 transition-colors">
+                    <span className="text-[10px] font-mono text-[#9D9988] group-hover:text-[#141410] transition-colors">
                       +
                     </span>
                   </div>

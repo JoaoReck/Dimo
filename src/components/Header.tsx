@@ -15,7 +15,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <div
-      className="w-full border-b border-[#252A33]/40 select-none"
+      className="w-full border-b border-[#C4C0AB]/60 select-none"
       style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
     >
       <div className="w-full max-w-lg mx-auto px-3 sm:px-4 py-2 sm:py-2.5">
@@ -32,17 +32,17 @@ export const Header: React.FC<HeaderProps> = ({
             aria-label="Timeline 24 horas"
             className={`w-full h-11 sm:h-12 flex items-center justify-center rounded-2xl transition-all cursor-pointer relative group ${
               currentView === 'timeline'
-                ? 'bg-[#181C26] text-emerald-400 border border-emerald-500/35 shadow-[0_0_16px_rgba(34,197,94,0.15)]'
-                : 'text-[#8B919E] hover:text-[#F5F5F5] hover:bg-[#13161D]/60 border border-transparent'
+                ? 'bg-[#141410] text-[#EDE8D0] border border-[#141410] shadow-[0_2px_10px_rgba(20,20,16,0.18)]'
+                : 'text-[#777567] hover:text-[#141410] hover:bg-[#C4C0AB]/40 border border-transparent'
             }`}
           >
             <GitCommitVertical
               className={`w-5 h-5 transition-transform ${
-                currentView === 'timeline' ? 'stroke-[2.4] scale-105' : 'stroke-[2]'
+                currentView === 'timeline' ? 'stroke-[2.4] scale-105 text-[#EDE8D0]' : 'stroke-[2]'
               }`}
             />
             {currentView === 'timeline' && (
-              <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+              <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#EDE8D0]" />
             )}
           </button>
 
@@ -54,17 +54,17 @@ export const Header: React.FC<HeaderProps> = ({
             aria-label="Checklist de atividades"
             className={`w-full h-11 sm:h-12 flex items-center justify-center rounded-2xl transition-all cursor-pointer relative group ${
               currentView === 'checklist'
-                ? 'bg-[#181C26] text-emerald-400 border border-emerald-500/35 shadow-[0_0_16px_rgba(34,197,94,0.15)]'
-                : 'text-[#8B919E] hover:text-[#F5F5F5] hover:bg-[#13161D]/60 border border-transparent'
+                ? 'bg-[#141410] text-[#EDE8D0] border border-[#141410] shadow-[0_2px_10px_rgba(20,20,16,0.18)]'
+                : 'text-[#777567] hover:text-[#141410] hover:bg-[#C4C0AB]/40 border border-transparent'
             }`}
           >
             <CheckSquare
               className={`w-5 h-5 transition-transform ${
-                currentView === 'checklist' ? 'stroke-[2.4] scale-105' : 'stroke-[2]'
+                currentView === 'checklist' ? 'stroke-[2.4] scale-105 text-[#EDE8D0]' : 'stroke-[2]'
               }`}
             />
             {currentView === 'checklist' && (
-              <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+              <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#EDE8D0]" />
             )}
           </button>
 
@@ -76,17 +76,17 @@ export const Header: React.FC<HeaderProps> = ({
             aria-label="Grade diária"
             className={`w-full h-11 sm:h-12 flex items-center justify-center rounded-2xl transition-all cursor-pointer relative group ${
               currentView === 'calendar'
-                ? 'bg-[#181C26] text-emerald-400 border border-emerald-500/35 shadow-[0_0_16px_rgba(34,197,94,0.15)]'
-                : 'text-[#8B919E] hover:text-[#F5F5F5] hover:bg-[#13161D]/60 border border-transparent'
+                ? 'bg-[#141410] text-[#EDE8D0] border border-[#141410] shadow-[0_2px_10px_rgba(20,20,16,0.18)]'
+                : 'text-[#777567] hover:text-[#141410] hover:bg-[#C4C0AB]/40 border border-transparent'
             }`}
           >
             <CalendarDays
               className={`w-5 h-5 transition-transform ${
-                currentView === 'calendar' ? 'stroke-[2.4] scale-105' : 'stroke-[2]'
+                currentView === 'calendar' ? 'stroke-[2.4] scale-105 text-[#EDE8D0]' : 'stroke-[2]'
               }`}
             />
             {currentView === 'calendar' && (
-              <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+              <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#EDE8D0]" />
             )}
           </button>
         </nav>

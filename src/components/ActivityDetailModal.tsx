@@ -24,32 +24,32 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#141410]/60 backdrop-blur-sm">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ duration: 0.2 }}
-          className="w-full max-w-md rounded-2xl bg-[#13161D] border border-[#252A33] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+          className="w-full max-w-md rounded-2xl bg-[#FAF8F0] border border-[#C4C0AB] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
         >
           {/* Header */}
-          <div className="p-4 sm:p-5 border-b border-[#252A33] flex items-center justify-between">
+          <div className="p-4 sm:p-5 border-b border-[#C4C0AB] flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span
                 className={`w-2.5 h-2.5 rounded-full ${
                   activity.completed
-                    ? 'bg-emerald-500 shadow-[0_0_8px_#22C55E]'
-                    : 'bg-emerald-400 animate-pulse'
+                    ? 'bg-[#141410]'
+                    : 'bg-[#545248] animate-pulse'
                 }`}
               />
-              <span className="text-xs font-mono text-[#8B919E] tracking-wider uppercase">
-                MOMENTO DA JORNADA // {dayInfo.shortLabel}
+              <span className="text-xs font-mono text-[#777567] tracking-wider uppercase">
+                ATIVIDADE // {dayInfo.shortLabel}
               </span>
             </div>
 
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-[#8B919E] hover:text-white hover:bg-[#181C26] transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-[#777567] hover:text-[#141410] hover:bg-[#C4C0AB]/40 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -63,36 +63,36 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                 <span
                   className={`text-[11px] font-mono px-2 py-0.5 rounded border ${
                     activity.completed
-                      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 font-semibold'
-                      : 'bg-[#181C26] text-[#8B919E] border-[#252A33]'
+                      ? 'bg-[#141410] text-[#EDE8D0] border-[#141410] font-semibold'
+                      : 'bg-[#C4C0AB]/40 text-[#545248] border-[#C4C0AB]'
                   }`}
                 >
                   {activity.completed ? '● CONCLUÍDA' : '○ EM ABERTO'}
                 </span>
                 {activity.category && (
-                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-[#181C26] text-[#8B919E] border border-[#252A33]">
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-[#C4C0AB]/40 text-[#545248] border border-[#C4C0AB]">
                     {activity.category}
                   </span>
                 )}
                 {activity.duration && (
-                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-[#0B0D12] text-emerald-400 border border-[#252A33]">
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-[#EDE8D0] text-[#141410] border border-[#C4C0AB]">
                     {activity.duration}
                   </span>
                 )}
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight uppercase break-words">
+              <h2 className="text-xl sm:text-2xl font-black text-[#141410] tracking-tight uppercase break-words">
                 {activity.title}
               </h2>
             </div>
 
             {/* Time & Date Grid */}
-            <div className="grid grid-cols-2 gap-2.5 p-3 rounded-xl bg-[#0B0D12] border border-[#252A33]">
+            <div className="grid grid-cols-2 gap-2.5 p-3 rounded-xl bg-[#EDE8D0] border border-[#C4C0AB]">
               <div className="flex items-center gap-2 min-w-0">
-                <Clock className="w-4 h-4 text-emerald-400 shrink-0" />
+                <Clock className="w-4 h-4 text-[#141410] shrink-0" />
                 <div className="min-w-0">
-                  <div className="text-[10px] font-mono text-[#8B919E]">HORÁRIO</div>
-                  <div className="text-xs font-mono font-bold text-white truncate">
+                  <div className="text-[10px] font-mono text-[#777567]">HORÁRIO</div>
+                  <div className="text-xs font-mono font-bold text-[#141410] truncate">
                     {activity.startTime}
                     {activity.endTime ? ` — ${activity.endTime}` : ''}
                   </div>
@@ -100,10 +100,10 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
               </div>
 
               <div className="flex items-center gap-2 min-w-0">
-                <CalendarIcon className="w-4 h-4 text-emerald-400 shrink-0" />
+                <CalendarIcon className="w-4 h-4 text-[#141410] shrink-0" />
                 <div className="min-w-0">
-                  <div className="text-[10px] font-mono text-[#8B919E]">DATA</div>
-                  <div className="text-xs font-mono font-medium text-white truncate">
+                  <div className="text-[10px] font-mono text-[#777567]">DATA</div>
+                  <div className="text-xs font-mono font-medium text-[#141410] truncate">
                     {dayInfo.dateFormatted}
                   </div>
                 </div>
@@ -113,8 +113,8 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
             {/* Description */}
             {activity.description && (
               <div>
-                <div className="text-[10px] font-mono text-[#8B919E] mb-1">NOTAS / DIRETRIZES</div>
-                <p className="text-xs sm:text-sm text-[#C5CAD3] leading-relaxed p-3 rounded-xl bg-[#181C26]/50 border border-[#252A33] break-words">
+                <div className="text-[10px] font-mono text-[#777567] mb-1">NOTAS / DIRETRIZES</div>
+                <p className="text-xs sm:text-sm text-[#33312B] leading-relaxed p-3 rounded-xl bg-[#EDE8D0]/60 border border-[#C4C0AB] break-words">
                   {activity.description}
                 </p>
               </div>
@@ -122,11 +122,11 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
           </div>
 
           {/* Footer Actions */}
-          <div className="p-3.5 sm:p-4 border-t border-[#252A33] bg-[#0B0D12]/60 flex flex-wrap items-center justify-between gap-2">
+          <div className="p-3.5 sm:p-4 border-t border-[#C4C0AB] bg-[#EDE8D0] flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => onEdit(activity)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#181C26] border border-[#252A33] text-xs font-mono text-white hover:bg-[#252A33] transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#FAF8F0] border border-[#C4C0AB] text-xs font-mono text-[#33312B] hover:bg-[#C4C0AB]/40 transition-colors cursor-pointer"
               >
                 <Edit3 className="w-3.5 h-3.5" />
                 <span>EDITAR</span>
@@ -134,7 +134,7 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
 
               <button
                 onClick={() => onDelete(activity.id)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#181C26] border border-[#252A33] text-xs font-mono text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#FAF8F0] border border-[#C4C0AB] text-xs font-mono text-red-700 hover:bg-red-50 hover:border-red-200 transition-colors cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>EXCLUIR</span>
@@ -145,8 +145,8 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
               onClick={() => onToggleComplete(activity.id)}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-mono font-bold transition-all shadow-md cursor-pointer ${
                 activity.completed
-                  ? 'bg-[#181C26] hover:bg-[#252A33] text-white border border-[#3B4252]'
-                  : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_15px_rgba(34,197,94,0.3)]'
+                  ? 'bg-[#FAF8F0] hover:bg-[#C4C0AB]/40 text-[#141410] border border-[#9D9988]'
+                  : 'bg-[#141410] hover:bg-[#33312B] text-[#EDE8D0]'
               }`}
             >
               {activity.completed ? (
