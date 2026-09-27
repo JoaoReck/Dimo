@@ -14,10 +14,7 @@ export const Header: React.FC<HeaderProps> = ({
   onViewChange,
 }) => {
   return (
-    <div
-      className="w-full border-b border-[#C4C0AB]/60 select-none"
-      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
-    >
+    <div className="w-full border-b border-[#C4C0AB]/60 select-none">
       <div className="w-full max-w-lg mx-auto px-3 sm:px-4 py-2 sm:py-2.5">
         {/* Main Tab Navigation: Distributed across full width with equal touch areas */}
         <nav

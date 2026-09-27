@@ -96,23 +96,6 @@ export default function App() {
   const completedActivities = currentActivities.filter((a) => a.completed).length;
   const allCompleted = totalActivities > 0 && completedActivities === totalActivities;
 
-  // Daily missions calculation (0 to 3) for the active day
-  const dailyMissionsCompleted = useMemo(() => {
-    let count = 0;
-    // 1. Planejar: pelo menos 1 atividade criada para o dia
-    if (totalActivities > 0) count++;
-    // 2. Foco: pelo menos 1 atividade concluída
-    if (completedActivities >= 1) count++;
-    // 3. Constância: concluir 3 atividades (ou todas se houver pelo menos 2)
-    if (
-      completedActivities >= 3 ||
-      (totalActivities >= 2 && completedActivities === totalActivities)
-    ) {
-      count++;
-    }
-    return Math.min(3, count);
-  }, [totalActivities, completedActivities]);
-
   // Toggle completion of an activity
   const handleToggleComplete = useCallback(
     (id: string, e?: React.MouseEvent) => {
@@ -343,8 +326,18 @@ export default function App() {
 
   return (
     <div className="w-full h-full h-[100dvh] max-w-full overflow-hidden bg-[#EDE8D0] text-[#141410] flex flex-col font-sans selection:bg-[#33312B] selection:text-[#EDE8D0]">
-      {/* ÁREA 1 — INTERFACE FIXA (Header + DaySelector) */}
-      <header className="shrink-0 w-full z-30 bg-[#EDE8D0]/95 backdrop-blur-md border-b border-[#C4C0AB] shadow-[0_2px_12px_rgba(20,20,16,0.04)]">
+      {/* ÁREA 1 — INTERFACE FIXA (Área segura do iOS + Toolbar + DaySelector) */}
+      <header className="shrink-0 w-full z-30 bg-[#EDE8D0] border-b border-[#C4C0AB] shadow-[0_2px_12px_rgba(20,20,16,0.04)] select-none">
+        {/* Área segura do iOS (Dynamic Island / Notch / Status Bar) */}
+        <div
+          className="w-full shrink-0 bg-[#EDE8D0]"
+          style={{
+            height: 'env(safe-area-inset-top, 0px)',
+            minHeight: 'env(safe-area-inset-top, 0px)',
+          }}
+          aria-hidden="true"
+        />
+
         <Header
           currentView={currentView}
           onViewChange={(v) => {
@@ -477,7 +470,7 @@ export default function App() {
       />
 
       {/* Live Bottom Footer Bar */}
-      <FooterBar missionsCompleted={dailyMissionsCompleted} />
+      <FooterBar completedActivities={completedActivities} totalActivities={totalActivities} />
     </div>
   );
 }
