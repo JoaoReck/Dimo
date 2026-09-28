@@ -47,7 +47,7 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
           type="button"
           onClick={onPrevDay}
           title="Dia anterior (deslize para a direita ou ←)"
-          className="p-2 sm:p-2.5 rounded-xl text-[#545248] hover:text-[#141410] hover:bg-[#C4C0AB]/60 active:scale-95 transition-all cursor-pointer shrink-0"
+          className="p-2 sm:p-2.5 rounded-xl text-[#545248] hover:text-[#141410] hover:bg-[#C4C0AB]/60 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-200 cursor-pointer shrink-0"
           aria-label="Dia anterior"
         >
           <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
@@ -58,7 +58,7 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
           type="button"
           onClick={onToday}
           title={currentOffset !== 0 ? 'Voltar para Hoje' : 'Rolar para horário atual'}
-          className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-mono transition-all truncate text-center cursor-pointer text-[#141410] hover:bg-[#C4C0AB]/40 active:scale-98 min-h-[40px]"
+          className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-mono transition-all duration-200 truncate text-center cursor-pointer text-[#141410] hover:bg-[#C4C0AB]/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-98 min-h-[40px]"
         >
           <span className="truncate font-semibold tracking-tight">{dayInfo.label}</span>
           {currentOffset !== 0 && (
@@ -73,7 +73,7 @@ export const DaySelector: React.FC<DaySelectorProps> = ({
           type="button"
           onClick={onNextDay}
           title="Próximo dia (deslize para a esquerda ou →)"
-          className="p-2 sm:p-2.5 rounded-xl text-[#545248] hover:text-[#141410] hover:bg-[#C4C0AB]/60 active:scale-95 transition-all cursor-pointer shrink-0"
+          className="p-2 sm:p-2.5 rounded-xl text-[#545248] hover:text-[#141410] hover:bg-[#C4C0AB]/60 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-200 cursor-pointer shrink-0"
           aria-label="Próximo dia"
         >
           <ChevronRight className="w-5 h-5 stroke-[2.2]" />

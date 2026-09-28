@@ -85,6 +85,27 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
   };
 
+  // State: Currently selected empty hour showing the official Dimo sword (creation waypoint)
+  const [selectedEmptyHour, setSelectedEmptyHour] = React.useState<number | null>(() => {
+    return isToday ? currentHour : 8;
+  });
+
+  // Keep selected empty hour updated when date changes
+  useEffect(() => {
+    setSelectedEmptyHour(isToday ? currentHour : 8);
+  }, [currentOffset, isToday, currentHour]);
+
+  // Handler for clicking on an empty hour
+  const handleEmptyHourClick = (hour: number, hourStr: string) => {
+    if (selectedEmptyHour === hour) {
+      // Already selected with the Dimo sword: open creation flow!
+      onNewActivity(undefined, hourStr);
+    } else {
+      // Move the Dimo sword to this newly selected hour
+      setSelectedEmptyHour(hour);
+    }
+  };
+
   return (
     <div
       ref={containerRef}
@@ -100,6 +121,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             const hasActivities = hourActivities.length > 0;
             const isCurrentHour = isToday && hour === currentHour;
             const isPastHour = isToday && hour < currentHour;
+
+            // Empty hour selection state
+            const isSelectedEmpty = !hasActivities && selectedEmptyHour === hour;
 
             // Activity states
             const hasNextActivity = hourActivities.some(
@@ -117,14 +141,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 className={`relative flex ${
                   hasActivities && hourActivities.length > 1
                     ? 'items-start pt-2.5 pb-3 sm:pt-3 sm:pb-3.5'
-                    : 'items-center py-2.5 sm:py-3.5'
-                } gap-2.5 sm:gap-3.5 transition-colors rounded-2xl ${
+                    : 'items-center py-2 sm:py-2.5'
+                } gap-2.5 sm:gap-3.5 transition-colors duration-200 rounded-2xl ${
                   isCurrentHour ? 'bg-[#C4C0AB]/25' : ''
                 }`}
               >
                 {/* 1. Left Time Marker (clean monospace anchor along the journey path) */}
                 <div
-                  onClick={() => !hasActivities && onNewActivity(undefined, hourStr)}
+                  onClick={() => !hasActivities && handleEmptyHourClick(hour, hourStr)}
                   className={`w-12 sm:w-14 shrink-0 text-right font-mono text-[11px] sm:text-xs transition-colors cursor-pointer select-none ${
                     hasActivities && hourActivities.length > 1 ? 'pt-2.5' : ''
                   } ${
@@ -134,7 +158,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                       ? 'text-[#9D9988]'
                       : 'text-[#777567] hover:text-[#141410]'
                   }`}
-                  title={`Criar atividade às ${hourStr}`}
+                  title={hasActivities ? hourStr : `Selecionar ${hourStr}`}
                 >
                   <span className="font-mono-numbers">{hourStr}</span>
                   {isCurrentHour && (
@@ -152,7 +176,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 >
                   {/* Vertical Spine Trail (Segment precisely centered behind the milestone) */}
                   <div
-                    className={`absolute left-1/2 -translate-x-1/2 w-[3px] bg-[#C4C0AB] ${
+                    className={`absolute left-1/2 -translate-x-1/2 w-[3px] bg-[#C4C0AB] transition-colors duration-300 ${
                       hour === 0 ? 'top-1/2 rounded-t-full' : 'top-0'
                     } ${hour === 23 ? 'bottom-1/2 rounded-b-full' : 'bottom-0'}`}
                     aria-hidden="true"
@@ -161,7 +185,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   {/* Active progress trail along the spine for Today up to current hour */}
                   {isToday && hour <= currentHour && (
                     <div
-                      className={`absolute left-1/2 -translate-x-1/2 w-[3px] bg-[#141410] ${
+                      className={`absolute left-1/2 -translate-x-1/2 w-[3px] bg-[#141410] transition-all duration-300 ${
                         hour === 0 ? 'top-1/2 rounded-t-full' : 'top-0'
                       } ${
                         hour === currentHour ? 'bottom-1/2' : 'bottom-0'
@@ -186,37 +210,39 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                               onOpenDetail(hourActivities[0]);
                             }
                           }}
-                          className={`rounded-full transition-all flex items-center justify-center cursor-pointer relative z-10 select-none ${
+                          className={`group rounded-full transition-all duration-200 ease-out flex items-center justify-center cursor-pointer relative z-10 select-none hover:scale-[1.05] hover:-translate-y-0.5 active:scale-[0.96] active:translate-y-0 ${
                             allCompletedInHour
-                              ? 'w-13.5 h-13.5 sm:w-14 sm:h-14 bg-[#141410] border border-[#141410] shadow-xs active:scale-95'
+                              ? 'w-13.5 h-13.5 sm:w-14 sm:h-14 bg-[#141410] border border-[#141410] shadow-xs'
                               : isCurrentHour
-                              ? 'w-16 h-16 sm:w-[68px] sm:h-[68px] bg-[#FAF8F0] border-2 border-[#141410] ring-2 ring-[#141410] ring-offset-2 ring-offset-[#EDE8D0] shadow-xs active:scale-95'
+                              ? 'w-16 h-16 sm:w-[68px] sm:h-[68px] bg-[#FAF8F0] border-2 border-[#141410] ring-2 ring-[#141410] ring-offset-2 ring-offset-[#EDE8D0] shadow-xs'
                               : hasNextActivity
-                              ? 'w-14 h-14 sm:w-15 sm:h-15 bg-[#FAF8F0] border-2 border-[#141410] ring-2 ring-[#141410]/20 ring-offset-1 ring-offset-[#EDE8D0] shadow-xs active:scale-95'
+                              ? 'w-14 h-14 sm:w-15 sm:h-15 bg-[#FAF8F0] border-2 border-[#141410] ring-2 ring-[#141410]/20 ring-offset-1 ring-offset-[#EDE8D0] shadow-xs'
                               : someCompleted
-                              ? 'w-13.5 h-13.5 sm:w-14 sm:h-14 bg-[#545248] border border-[#33312B] shadow-xs active:scale-95'
-                              : 'w-13.5 h-13.5 sm:w-14 sm:h-14 bg-[#FAF8F0] border border-[#C4C0AB] hover:border-[#141410] shadow-xs active:scale-95'
+                              ? 'w-13.5 h-13.5 sm:w-14 sm:h-14 bg-[#545248] border border-[#33312B] shadow-xs'
+                              : 'w-13.5 h-13.5 sm:w-14 sm:h-14 bg-[#FAF8F0] border border-[#C4C0AB] hover:border-[#141410] shadow-xs'
                           }`}
                           title={`${hourActivities.length} atividade(s) às ${hourStr}`}
                           aria-label={`${hourActivities.length} atividade(s) às ${hourStr}`}
                         >
-                          {/* RPG Pixel-art item icon */}
-                          <RpgIcon
-                            icon={primaryIcon}
-                            size={isCurrentHour ? 28 : hasNextActivity ? 25 : 23}
-                            variant={
-                              allCompletedInHour || someCompleted
-                                ? 'completed'
-                                : isPastHour
-                                ? 'muted'
-                                : 'default'
-                            }
-                          />
+                          {/* RPG Pixel-art item icon with Clint Hess microinteraction */}
+                          <div className="transition-transform duration-200 group-hover:scale-110 group-hover:-translate-y-0.5">
+                            <RpgIcon
+                              icon={primaryIcon}
+                              size={isCurrentHour ? 28 : hasNextActivity ? 25 : 23}
+                              variant={
+                                allCompletedInHour || someCompleted
+                                  ? 'completed'
+                                  : isPastHour
+                                  ? 'muted'
+                                  : 'default'
+                              }
+                            />
+                          </div>
 
                           {/* Discrete check badge at bottom-right corner when completed */}
                           {allCompletedInHour && (
                             <span
-                              className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-[#FAF8F0] border border-[#141410] text-[#141410] flex items-center justify-center shadow-xs"
+                              className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-[#FAF8F0] border border-[#141410] text-[#141410] flex items-center justify-center shadow-xs transition-transform duration-200 group-hover:scale-110"
                               title="Etapa concluída"
                             >
                               <Check className="w-2.5 h-2.5 stroke-[3.5]" />
@@ -235,27 +261,35 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                         </button>
                       );
                     })()
-                  ) : (
-                    /* Empty Hour Node (Inviting Architectural Waypoint, touch to add) */
+                  ) : isSelectedEmpty ? (
+                    /* Selected Empty Hour with Official Dimo Sword (Clint Hess Microinteraction: ready to create) */
                     <button
                       type="button"
-                      onClick={() => onNewActivity(undefined, hourStr)}
-                      title={`Adicionar atividade às ${hourStr}`}
-                      className={`rounded-full transition-all cursor-pointer group flex items-center justify-center relative z-10 ${
-                        isCurrentHour
-                          ? 'w-11 h-11 sm:w-12 sm:h-12 border-2 border-[#141410] bg-[#FAF8F0] ring-2 ring-[#141410] ring-offset-2 ring-offset-[#EDE8D0] shadow-xs active:scale-95'
-                          : 'w-9.5 h-9.5 sm:w-10 sm:h-10 border border-[#C4C0AB] bg-[#FAF8F0]/70 hover:border-[#141410] hover:bg-[#FAF8F0] shadow-xs active:scale-95'
-                      }`}
-                      aria-label={`Adicionar atividade às ${hourStr}`}
+                      onClick={() => handleEmptyHourClick(hour, hourStr)}
+                      title={`Horário selecionado (${hourStr}) — Toque para criar atividade`}
+                      className="group w-14 h-14 sm:w-15 sm:h-15 rounded-full bg-[#FAF8F0] border-2 border-[#141410] ring-2 ring-[#141410]/25 ring-offset-2 ring-offset-[#EDE8D0] shadow-xs cursor-pointer flex items-center justify-center relative z-10 transition-all duration-200 hover:scale-[1.06] hover:-translate-y-0.5 active:scale-[0.96] active:translate-y-0 select-none"
+                      aria-label={`Horário selecionado (${hourStr}) — Toque para criar atividade`}
                     >
-                      {isCurrentHour ? (
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#141410] animate-pulse" />
-                      ) : (
-                        <div className="flex items-center justify-center">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#C4C0AB] group-hover:hidden transition-colors" />
-                          <Plus className="w-3.5 h-3.5 stroke-[2.5] hidden group-hover:block text-[#141410] transition-transform group-hover:scale-110" />
-                        </div>
-                      )}
+                      {/* Official Dimo RPG Chromatic Sword Asset */}
+                      <img
+                        src="/icone4.png"
+                        alt="Dimo Espada"
+                        width={32}
+                        height={32}
+                        className="w-7 h-7 sm:w-8 sm:h-8 object-contain pixel-crisp pointer-events-none transition-transform duration-200 group-hover:scale-110 group-hover:-translate-y-0.5"
+                      />
+                    </button>
+                  ) : (
+                    /* Normal Unselected Empty Hour Waypoint (calm, clean, transitions to sword on click) */
+                    <button
+                      type="button"
+                      onClick={() => handleEmptyHourClick(hour, hourStr)}
+                      title={`Selecionar ${hourStr} para adicionar atividade`}
+                      className="w-9.5 h-9.5 sm:w-10 sm:h-10 rounded-full border border-[#C4C0AB] bg-[#FAF8F0]/70 hover:border-[#141410] hover:bg-[#FAF8F0] transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer group flex items-center justify-center relative z-10 select-none shadow-xs"
+                      aria-label={`Selecionar ${hourStr}`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#C4C0AB] group-hover:bg-[#141410] transition-colors" />
+                      <Plus className="w-3.5 h-3.5 stroke-[2.5] hidden group-hover:block text-[#141410] transition-transform group-hover:scale-110 absolute" />
                     </button>
                   )}
                 </div>
@@ -275,14 +309,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                             key={act.id}
                             layout
                             onClick={() => onOpenDetail(act)}
-                            className={`group w-full py-2.5 px-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 ${
+                            className={`group w-full py-2.5 px-3.5 rounded-2xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-2.5 hover:-translate-y-0.5 active:scale-[0.985] active:translate-y-0 ${
                               isCompleted
                                 ? 'bg-[#FAF8F0]/70 border-[#C4C0AB] text-[#777567] hover:border-[#9D9988]'
                                 : isNext
                                 ? 'bg-[#FAF8F0] border-2 border-[#141410] shadow-[0_2px_8px_rgba(20,20,16,0.06)] text-[#141410]'
                                 : isCurrentHour
                                 ? 'bg-[#FAF8F0] border border-[#141410] text-[#141410] shadow-xs'
-                                : 'bg-[#FAF8F0] border border-[#C4C0AB] hover:border-[#9D9988] text-[#33312B]'
+                                : 'bg-[#FAF8F0] border border-[#C4C0AB] hover:border-[#141410] text-[#33312B]'
                             }`}
                           >
                             {/* Checkmark button + RPG Icon + Title */}
@@ -298,7 +332,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                                     ? 'Reabrir atividade'
                                     : 'Concluir atividade'
                                 }
-                                className={`w-5.5 h-5.5 rounded-lg flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+                                className={`w-5.5 h-5.5 rounded-lg flex items-center justify-center transition-all duration-150 shrink-0 cursor-pointer hover:scale-105 active:scale-90 ${
                                   isCompleted
                                     ? 'bg-[#141410] text-[#EDE8D0] shadow-xs'
                                     : isNext
@@ -317,7 +351,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                               </button>
 
                               {/* Subtle RPG Item Icon inside the activity card */}
-                              <div className="shrink-0 flex items-center justify-center">
+                              <div className="shrink-0 flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
                                 <RpgIcon
                                   icon={actIcon}
                                   size={18}
@@ -372,14 +406,21 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                       })}
                     </div>
                   ) : (
-                    /* Empty Hour: clean, calm, click to schedule */
+                    /* Empty Hour placeholder: clean, calm, click to schedule */
                     <div
-                      onClick={() => onNewActivity(undefined, hourStr)}
-                      className="w-full py-2 px-2.5 rounded-xl hover:bg-[#C4C0AB]/30 transition-colors cursor-pointer group flex items-center justify-between"
+                      onClick={() => {
+                        setSelectedEmptyHour(hour);
+                        onNewActivity(undefined, hourStr);
+                      }}
+                      className={`w-full py-2 px-2.5 rounded-xl transition-all duration-200 cursor-pointer group flex items-center justify-between ${
+                        isSelectedEmpty
+                          ? 'bg-[#C4C0AB]/30 border border-[#141410]/20'
+                          : 'hover:bg-[#C4C0AB]/25'
+                      }`}
                     >
-                      <span className="text-[11px] font-mono text-transparent group-hover:text-[#777567] transition-colors flex items-center gap-1.5">
-                        <Plus className="w-3.5 h-3.5 text-[#545248]" />
-                        <span>Adicionar às {hourStr}</span>
+                      <span className="text-[11px] font-mono text-[#777567] group-hover:text-[#141410] transition-colors flex items-center gap-1.5">
+                        <Plus className="w-3.5 h-3.5 text-[#545248] group-hover:rotate-90 transition-transform duration-200" />
+                        <span>{isSelectedEmpty ? `Criar atividade às ${hourStr}` : `Adicionar às ${hourStr}`}</span>
                       </span>
 
                       <span className="text-[11px] font-mono text-[#9D9988] opacity-0 group-hover:opacity-100 transition-opacity">

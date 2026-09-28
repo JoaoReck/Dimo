@@ -27,14 +27,14 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => onViewChange('timeline')}
             title="Timeline / Jornada do Dia"
             aria-label="Timeline 24 horas"
-            className={`w-full h-12 sm:h-13 flex flex-col items-center justify-center rounded-2xl cursor-pointer relative group transition-all duration-150 active:scale-[0.98] ${
+            className={`w-full h-12 sm:h-13 flex flex-col items-center justify-center rounded-2xl cursor-pointer relative group transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.96] ${
               currentView === 'timeline'
                 ? 'bg-[#141410] text-[#EDE8D0] border-2 border-[#141410] shadow-[0_2px_8px_rgba(20,20,16,0.18)]'
-                : 'text-[#545248] hover:text-[#141410] hover:bg-[#C4C0AB]/50 border-2 border-transparent'
+                : 'text-[#545248] hover:text-[#141410] hover:bg-[#C4C0AB]/50 border-2 border-transparent hover:border-[#C4C0AB]/60'
             }`}
           >
             <GitCommitVertical
-              className={`w-5.5 h-5.5 sm:w-6 sm:h-6 crisp-nav-icon ${
+              className={`w-5.5 h-5.5 sm:w-6 sm:h-6 crisp-nav-icon transition-transform duration-200 group-hover:scale-110 group-hover:-translate-y-0.5 ${
                 currentView === 'timeline' ? 'stroke-[2.4] text-[#EDE8D0]' : 'stroke-[2]'
               }`}
             />
@@ -49,14 +49,14 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => onViewChange('checklist')}
             title="Checklist de Atividades"
             aria-label="Checklist de atividades"
-            className={`w-full h-12 sm:h-13 flex flex-col items-center justify-center rounded-2xl cursor-pointer relative group transition-all duration-150 active:scale-[0.98] ${
+            className={`w-full h-12 sm:h-13 flex flex-col items-center justify-center rounded-2xl cursor-pointer relative group transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.96] ${
               currentView === 'checklist'
                 ? 'bg-[#141410] text-[#EDE8D0] border-2 border-[#141410] shadow-[0_2px_8px_rgba(20,20,16,0.18)]'
-                : 'text-[#545248] hover:text-[#141410] hover:bg-[#C4C0AB]/50 border-2 border-transparent'
+                : 'text-[#545248] hover:text-[#141410] hover:bg-[#C4C0AB]/50 border-2 border-transparent hover:border-[#C4C0AB]/60'
             }`}
           >
             <CheckSquare
-              className={`w-5.5 h-5.5 sm:w-6 sm:h-6 crisp-nav-icon ${
+              className={`w-5.5 h-5.5 sm:w-6 sm:h-6 crisp-nav-icon transition-transform duration-200 group-hover:scale-110 group-hover:-translate-y-0.5 ${
                 currentView === 'checklist' ? 'stroke-[2.4] text-[#EDE8D0]' : 'stroke-[2]'
               }`}
             />
@@ -71,14 +71,14 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => onViewChange('calendar')}
             title="Grade Diária"
             aria-label="Grade diária"
-            className={`w-full h-12 sm:h-13 flex flex-col items-center justify-center rounded-2xl cursor-pointer relative group transition-all duration-150 active:scale-[0.98] ${
+            className={`w-full h-12 sm:h-13 flex flex-col items-center justify-center rounded-2xl cursor-pointer relative group transition-all duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.96] ${
               currentView === 'calendar'
                 ? 'bg-[#141410] text-[#EDE8D0] border-2 border-[#141410] shadow-[0_2px_8px_rgba(20,20,16,0.18)]'
-                : 'text-[#545248] hover:text-[#141410] hover:bg-[#C4C0AB]/50 border-2 border-transparent'
+                : 'text-[#545248] hover:text-[#141410] hover:bg-[#C4C0AB]/50 border-2 border-transparent hover:border-[#C4C0AB]/60'
             }`}
           >
             <CalendarDays
-              className={`w-5.5 h-5.5 sm:w-6 sm:h-6 crisp-nav-icon ${
+              className={`w-5.5 h-5.5 sm:w-6 sm:h-6 crisp-nav-icon transition-transform duration-200 group-hover:scale-110 group-hover:-translate-y-0.5 ${
                 currentView === 'calendar' ? 'stroke-[2.4] text-[#EDE8D0]' : 'stroke-[2]'
               }`}
             />

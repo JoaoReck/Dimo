@@ -1,27 +1,6 @@
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <!-- Background subtle gradient -->
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FAF8F0" />
-      <stop offset="100%" stop-color="#EDE8D0" />
-    </linearGradient>
-    <filter id="badgeShadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#141410" flood-opacity="0.18" />
-    </filter>
-  </defs>
-
-  <!-- iOS / PWA Squircle Background -->
-  <rect width="512" height="512" rx="112.64" fill="url(#bgGrad)" />
-
-  <!-- Subtle inner border -->
-  <rect x="4" y="4" width="504" height="504" rx="112.64" fill="none" stroke="#C4C0AB" stroke-width="6" opacity="0.6" />
-
-  <!-- Diagonal Sword embedded inside the App Icon Badge -->
-  <g transform="translate(48, 48) scale(0.8125)">
-    
-
-  <defs>
     <!-- Left edge rainbow gradient (cyan to deep sky) -->
     <linearGradient id="bladeLeftD" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#38bdf8" />
@@ -130,8 +109,5 @@
     <!-- Red Cross Insignia -->
     <path d="M250 324 H262 V334 H272 V346 H262 V356 H250 V346 H240 V334 H250 Z" fill="url(#crossRedD)" stroke="#141410" stroke-width="4" stroke-linejoin="round" />
     <path d="M252 326 H260 V336 H270 V344 H260 V354 H252 V344 H242 V336 H252 Z" fill="#f87171" opacity="0.6" />
-  </g>
-
-
   </g>
 </svg>

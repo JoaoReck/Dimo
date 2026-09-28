@@ -1,13 +1,17 @@
-const CACHE_NAME = 'dimo-pwa-v1';
+const CACHE_NAME = 'dimo-pwa-v2-sword';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
   '/apple-touch-icon.png',
+  '/apple-touch-icon-precomposed.png',
   '/pwa-192x192.png',
   '/pwa-512x512.png',
+  '/pwa-maskable-512x512.png',
   '/icon.svg',
-  '/favicon-32x32.png'
+  '/favicon-32x32.png',
+  '/icone2.png',
+  '/icone4.png'
 ];
 
 self.addEventListener('install', (event) => {

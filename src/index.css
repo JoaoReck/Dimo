@@ -76,10 +76,10 @@
   }
 }
 
-/* Standalone / Web App iOS Top Cushion ("Respiro Superior") */
+/* Standalone / Web App iOS Top Cushion ("Respiro Superior ~10%") */
 @media all and (display-mode: standalone) {
   .ios-standalone-header {
-    padding-top: calc(max(env(safe-area-inset-top, 50px), 50px) + 18px) !important;
+    padding-top: calc(env(safe-area-inset-top, 38px) + 4px) !important;
   }
 }
 
@@ -92,6 +92,29 @@ svg {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* Pixel art rendering utility */
+.pixel-crisp {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+}
+
+/* Micro-interaction Spring & Hover curves (Inspired by Clint Hess) */
+.transition-micro {
+  transition-property: transform, opacity, background-color, border-color, box-shadow;
+  transition-duration: 220ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 .font-mono-numbers {

@@ -403,13 +403,13 @@ export default function App() {
 
   return (
     <div className="w-full h-full h-[100dvh] max-w-full overflow-hidden bg-[#EDE8D0] text-[#141410] flex flex-col font-sans selection:bg-[#33312B] selection:text-[#EDE8D0]">
-      {/* ÁREA 1 — INTERFACE FIXA (Área segura do iOS / Dynamic Island + Respiro Generoso + Toolbar + DaySelector) */}
+      {/* ÁREA 1 — INTERFACE FIXA (Área segura do iOS / Dynamic Island + Respiro ~10% + Toolbar + DaySelector) */}
       <header
         className="shrink-0 w-full z-30 bg-[#EDE8D0] border-b border-[#C4C0AB] shadow-[0_2px_12px_rgba(20,20,16,0.04)] select-none ios-standalone-header transition-all duration-150"
         style={{
           paddingTop: pwa.isStandalone
-            ? 'calc(max(env(safe-area-inset-top, 50px), 50px) + 18px)'
-            : 'max(env(safe-area-inset-top, 0px), 8px)',
+            ? 'calc(env(safe-area-inset-top, 38px) + 4px)'
+            : 'max(env(safe-area-inset-top, 0px), 6px)',
         }}
       >
         <Header
