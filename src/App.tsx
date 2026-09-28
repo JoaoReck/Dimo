@@ -404,28 +404,23 @@ export default function App() {
   return (
     <div className="w-full h-full h-[100dvh] max-w-full overflow-hidden bg-[#EDE8D0] text-[#141410] flex flex-col font-sans selection:bg-[#33312B] selection:text-[#EDE8D0]">
       {/* ÁREA 1 — INTERFACE FIXA (Área segura do iOS / Dynamic Island + Toolbar + DaySelector) */}
-      <header className="shrink-0 w-full z-30 bg-[#EDE8D0] border-b border-[#C4C0AB] select-none">
-        {/* iOS / PWA Standalone Safe Area spacer (strictly system height, perfectly isolated) */}
-        <div className="ios-safe-area-top w-full shrink-0" aria-hidden="true" />
+      <header className="shrink-0 w-full z-30 bg-[#EDE8D0] border-b border-[#C4C0AB] select-none toolbar-container">
+        <Header
+          currentView={currentView}
+          onViewChange={(v) => {
+            playTickSound();
+            setCurrentView(v);
+          }}
+        />
 
-        <div className="w-full header-content-box">
-          <Header
-            currentView={currentView}
-            onViewChange={(v) => {
-              playTickSound();
-              setCurrentView(v);
-            }}
-          />
-
-          {/* Clean Day Navigation - Pinned in Fixed Toolbar */}
-          <DaySelector
-            currentOffset={currentOffset}
-            dayInfo={currentDayInfo}
-            onPrevDay={handlePrevDay}
-            onNextDay={handleNextDay}
-            onToday={handleToday}
-          />
-        </div>
+        {/* Clean Day Navigation - Pinned in Fixed Toolbar */}
+        <DaySelector
+          currentOffset={currentOffset}
+          dayInfo={currentDayInfo}
+          onPrevDay={handlePrevDay}
+          onNextDay={handleNextDay}
+          onToday={handleToday}
+        />
       </header>
 
       {/* ÁREA 2 — TIMELINE / VISTAS COM SCROLL INTERNO INDEPENDENTE + NAVEGAÇÃO POR SWIPE */}

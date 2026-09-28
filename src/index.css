@@ -79,39 +79,42 @@
 }
 
 /* ==========================================================================
-   ESTRUTURA LIMPA DE SAFE AREA DO iOS / PWA STANDALONE
-   Princípio:
-   - Safe Area = Espaço estrito do sistema (Dynamic Island / Status Bar)
-   - Toolbar = Altura visual normal e compacta
-   - Zero backdrop-filter, zero GPU transforms artificiais, zero subpixel blur
+   SAFE AREA & TOOLBAR NO iOS (STANDALONE PWA E SAFARI)
+   1. padding-top: env(safe-area-inset-top) para descer os botões da área da Status Bar / Dynamic Island
+   2. Fundo sólido #EDE8D0 sem backdrop-filter no WebKit/iOS
    ========================================================================== */
 
-.ios-safe-area-top {
-  height: env(safe-area-inset-top, 0px);
-  width: 100%;
-  background-color: #EDE8D0;
-}
-
-.header-content-box {
+header,
+.toolbar-container {
+  /* Adiciona o recuo necessário da Dynamic Island / Status Bar */
+  padding-top: env(safe-area-inset-top, 0px);
   background-color: #EDE8D0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
-/* Regra específica de pureza para modo Standalone PWA */
-@media (display-mode: standalone) {
-  .ios-safe-area-top {
-    height: env(safe-area-inset-top, 0px);
+/* Regra específica para WebKit/iOS em standalone */
+@supports (-webkit-touch-callout: none) {
+  @media (display-mode: standalone) {
+    header,
+    .toolbar-container {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      filter: none !important;
+      background-color: #EDE8D0 !important;
+    }
   }
-  
+}
+
+/* Também garante pureza caso a media query display-mode: standalone seja acionada */
+@media (display-mode: standalone) {
   header,
-  .header-content-box,
   .toolbar-container {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     filter: none !important;
-    background: #EDE8D0 !important;
+    background-color: #EDE8D0 !important;
   }
 }
 
