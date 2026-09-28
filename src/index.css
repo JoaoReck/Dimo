@@ -79,43 +79,45 @@
 }
 
 /* ==========================================================================
-   SAFE AREA & TOOLBAR NO iOS (STANDALONE PWA E SAFARI)
-   1. padding-top: env(safe-area-inset-top) para descer os botões da área da Status Bar / Dynamic Island
-   2. Fundo sólido #EDE8D0 sem backdrop-filter no WebKit/iOS
+   PLACA DE FUNDO SÓLIDA NO TOPO DO iOS (PWA / STANDALONE)
+   - Cria uma camada sólida fixa na área da Dynamic Island/Status Bar (cor bege #EDE8D0)
+   - Faz o WebKit desativar o blur forçado e renderizar de forma 100% nítida
+   - Empurra a barra de ferramentas para baixo da zona da Safe Area
    ========================================================================== */
 
-header,
-.toolbar-container {
-  /* Adiciona o recuo estrito da Dynamic Island / Status Bar */
-  padding-top: env(safe-area-inset-top, 0px);
-  background-color: #EDE8D0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
-
-/* Regra específica para WebKit/iOS em standalone */
-@supports (-webkit-touch-callout: none) {
-  @media (display-mode: standalone) {
-    header,
-    .toolbar-container {
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-      filter: none !important;
-      background-color: #EDE8D0 !important;
-    }
-  }
-}
-
-/* Também garante pureza caso a media query display-mode: standalone seja acionada */
 @media (display-mode: standalone) {
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    /* Define a altura exata da safe area do iPhone (Dynamic Island / Status Bar) */
+    height: env(safe-area-inset-top, 0px);
+    /* Cor sólida oficial baunilha do Dimo */
+    background-color: #EDE8D0;
+    z-index: 99999;
+    pointer-events: none;
+  }
+
   header,
   .toolbar-container {
+    padding-top: env(safe-area-inset-top, 0px);
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     filter: none !important;
     background-color: #EDE8D0 !important;
   }
+}
+
+/* Fallback para Safari normal e dispositivos fora do modo standalone */
+header,
+.toolbar-container {
+  padding-top: env(safe-area-inset-top, 0px);
+  background-color: #EDE8D0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* Sharp vector rendering & smooth subpixel anti-aliasing */

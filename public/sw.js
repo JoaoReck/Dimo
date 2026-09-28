@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dimo-pwa-v4-statusbar';
+const CACHE_NAME = 'dimo-pwa-v5-solidbar';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
