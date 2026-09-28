@@ -76,6 +76,24 @@
   }
 }
 
+/* Standalone / Web App iOS Top Cushion ("Respiro Superior") */
+@media all and (display-mode: standalone) {
+  .ios-standalone-header {
+    padding-top: calc(max(env(safe-area-inset-top, 50px), 50px) + 18px) !important;
+  }
+}
+
+/* Sharp vector rendering & smooth subpixel anti-aliasing */
+svg {
+  shape-rendering: geometricPrecision;
+}
+
+.crisp-nav-icon {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 .font-mono-numbers {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-variant-numeric: tabular-nums;

@@ -2,6 +2,7 @@ import React from 'react';
 import { Activity, DayInfo } from '../types';
 import { X, Check, RotateCcw, Edit3, Trash2, Clock, Calendar as CalendarIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { RpgIcon, inferRpgIcon } from './RpgIcon';
 
 interface ActivityDetailModalProps {
   activity: Activity | null;
@@ -21,6 +22,8 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   onDelete,
 }) => {
   if (!activity) return null;
+
+  const iconId = activity.icon || inferRpgIcon(activity.title, activity.category);
 
   return (
     <AnimatePresence>
@@ -57,7 +60,7 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
 
           {/* Content */}
           <div className="p-4 sm:p-5 space-y-4 overflow-y-auto">
-            {/* Title & Status */}
+            {/* Title & Status with RPG Item Icon */}
             <div>
               <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <span
@@ -81,9 +84,27 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                 )}
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-black text-[#141410] tracking-tight uppercase break-words">
-                {activity.title}
-              </h2>
+              <div className="flex items-start gap-3">
+                <div
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${
+                    activity.completed
+                      ? 'bg-[#141410] border-[#141410]'
+                      : 'bg-[#EDE8D0] border-[#C4C0AB]'
+                  }`}
+                >
+                  <RpgIcon
+                    icon={iconId}
+                    size={26}
+                    variant={activity.completed ? 'completed' : 'default'}
+                  />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-xl sm:text-2xl font-black text-[#141410] tracking-tight uppercase break-words leading-tight">
+                    {activity.title}
+                  </h2>
+                </div>
+              </div>
             </div>
 
             {/* Time & Date Grid */}

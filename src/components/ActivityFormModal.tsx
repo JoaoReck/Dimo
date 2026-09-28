@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, DayInfo } from '../types';
-import { X, Clock, Calendar, Check, FileText } from 'lucide-react';
+import { Activity, DayInfo, RpgIconId } from '../types';
+import { X, Clock, Calendar, Check, FileText, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { RpgIcon, RPG_ICON_OPTIONS, inferRpgIcon } from './RpgIcon';
 
 interface ActivityFormModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface ActivityFormModalProps {
     endTime?: string;
     description?: string;
     category?: string;
+    icon?: RpgIconId;
   }) => void;
   initialActivity?: Activity | null;
   initialTitle?: string;
@@ -34,6 +36,8 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
   const [endTime, setEndTime] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Rotina');
+  const [selectedIcon, setSelectedIcon] = useState<RpgIconId>('scroll');
+  const [manuallySelectedIcon, setManuallySelectedIcon] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -43,15 +47,34 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
       setEndTime(initialActivity.endTime || '');
       setDescription(initialActivity.description || '');
       setCategory(initialActivity.category || 'Rotina');
+      setSelectedIcon(initialActivity.icon || inferRpgIcon(initialActivity.title, initialActivity.category));
+      setManuallySelectedIcon(Boolean(initialActivity.icon));
     } else {
-      setTitle(initialTitle || '');
+      const initT = initialTitle || '';
+      setTitle(initT);
       setStartTime(defaultStartTime || '08:00');
       setEndTime('');
       setDescription('');
       setCategory('Rotina');
+      setSelectedIcon(inferRpgIcon(initT, 'Rotina'));
+      setManuallySelectedIcon(false);
     }
     setError('');
   }, [initialActivity, initialTitle, defaultStartTime, isOpen]);
+
+  // Auto-infer icon when title changes unless user manually chose an icon
+  const handleTitleChange = (val: string) => {
+    setTitle(val);
+    if (error) setError('');
+    if (!manuallySelectedIcon) {
+      setSelectedIcon(inferRpgIcon(val, category));
+    }
+  };
+
+  const handleSelectIcon = (iconId: RpgIconId) => {
+    setSelectedIcon(iconId);
+    setManuallySelectedIcon(true);
+  };
 
   if (!isOpen) return null;
 
@@ -73,6 +96,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
       endTime: endTime.trim() ? endTime.trim() : undefined,
       description: description.trim() ? description.trim() : undefined,
       category,
+      icon: selectedIcon,
     });
     onClose();
   };
@@ -131,14 +155,51 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
               <input
                 type="text"
                 value={title}
-                onChange={(e) => {
-                  setTitle(e.target.value);
-                  if (error) setError('');
-                }}
+                onChange={(e) => handleTitleChange(e.target.value)}
                 placeholder="Ex: Café, Trabalho, Treino, Almoço, Estudar..."
                 className="w-full px-3 py-2 rounded-lg bg-[#EDE8D0] border border-[#C4C0AB] focus:border-[#141410] focus:ring-1 focus:ring-[#141410] text-[#141410] text-sm placeholder:text-[#9D9988] outline-none transition-all"
                 autoFocus
               />
+            </div>
+
+            {/* RPG Icon Selector */}
+            <div>
+              <label className="block text-[11px] font-mono text-[#777567] mb-1.5 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Sparkles className="w-3 h-3 text-[#141410]" />
+                  <span>SÍMBOLO DA JORNADA (RPG)</span>
+                </span>
+                <span className="text-[10px] text-[#9D9988] font-mono">
+                  {RPG_ICON_OPTIONS.find((o) => o.id === selectedIcon)?.desc}
+                </span>
+              </label>
+              <div className="grid grid-cols-5 gap-1.5 p-2 rounded-xl bg-[#EDE8D0]/80 border border-[#C4C0AB]">
+                {RPG_ICON_OPTIONS.map((opt) => {
+                  const isSelected = selectedIcon === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => handleSelectIcon(opt.id)}
+                      title={`${opt.label} — ${opt.desc}`}
+                      className={`flex flex-col items-center justify-center p-1.5 rounded-lg transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-[#FAF8F0] border-2 border-[#141410] shadow-xs scale-105'
+                          : 'bg-[#EDE8D0] hover:bg-[#FAF8F0] border border-transparent hover:border-[#C4C0AB]'
+                      }`}
+                    >
+                      <RpgIcon
+                        icon={opt.id}
+                        size={22}
+                        variant={isSelected ? 'default' : 'muted'}
+                      />
+                      <span className="text-[9px] font-mono mt-1 text-[#545248] truncate max-w-full">
+                        {opt.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Times */}

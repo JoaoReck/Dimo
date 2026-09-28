@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useCallback } from 'react';
-import { Activity } from '../types';
+import { Activity, RpgIconId } from '../types';
 import { Check, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
+import { RpgIcon, inferRpgIcon } from './RpgIcon';
 
 interface TimelineViewProps {
   activities: Activity[];
@@ -93,23 +94,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       <div className="w-full max-w-lg mx-auto px-3 sm:px-4">
         {/* 24-Hour Vertical Continuous Journey */}
         <div className="relative py-2">
-          {/* Continuous Journey Path (Spine) */}
-          <div
-            className="absolute left-[3.25rem] sm:left-[3.75rem] top-6 bottom-6 w-[2px] bg-[#C4C0AB] pointer-events-none"
-            aria-hidden="true"
-          />
-
-          {/* Active progress trail along the spine (from top to current hour on Today) */}
-          {isToday && (
-            <div
-              className="absolute left-[3.25rem] sm:left-[3.75rem] top-6 w-[2px] bg-[#141410] pointer-events-none transition-all"
-              style={{
-                height: `${Math.min(100, Math.max(0, (currentHour / 23) * 100))}%`,
-              }}
-              aria-hidden="true"
-            />
-          )}
-
           {hours.map((hour) => {
             const hourStr = `${String(hour).padStart(2, '0')}:00`;
             const hourActivities = getActivitiesForHour(hour);
@@ -117,7 +101,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             const isCurrentHour = isToday && hour === currentHour;
             const isPastHour = isToday && hour < currentHour;
 
-            // Check if any activity in this hour is next, completed, or active
+            // Activity states
             const hasNextActivity = hourActivities.some(
               (a) => a.id === nextActivityId && !a.completed
             );
@@ -130,14 +114,20 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               <div
                 key={hour}
                 ref={isCurrentHour ? currentHourRef : undefined}
-                className={`relative flex items-start gap-2.5 sm:gap-3 py-1 sm:py-1.5 transition-colors rounded-2xl ${
-                  isCurrentHour ? 'bg-[#C4C0AB]/20' : ''
+                className={`relative flex ${
+                  hasActivities && hourActivities.length > 1
+                    ? 'items-start pt-2.5 pb-3 sm:pt-3 sm:pb-3.5'
+                    : 'items-center py-2.5 sm:py-3.5'
+                } gap-2.5 sm:gap-3.5 transition-colors rounded-2xl ${
+                  isCurrentHour ? 'bg-[#C4C0AB]/25' : ''
                 }`}
               >
-                {/* 1. Left Time Marker (clean monospace anchor along the path) */}
+                {/* 1. Left Time Marker (clean monospace anchor along the journey path) */}
                 <div
                   onClick={() => !hasActivities && onNewActivity(undefined, hourStr)}
-                  className={`w-11 sm:w-13 shrink-0 pt-1 text-right font-mono text-[11px] sm:text-xs transition-colors cursor-pointer select-none ${
+                  className={`w-12 sm:w-14 shrink-0 text-right font-mono text-[11px] sm:text-xs transition-colors cursor-pointer select-none ${
+                    hasActivities && hourActivities.length > 1 ? 'pt-2.5' : ''
+                  } ${
                     isCurrentHour
                       ? 'text-[#141410] font-bold'
                       : isPastHour
@@ -146,91 +136,156 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   }`}
                   title={`Criar atividade às ${hourStr}`}
                 >
-                  <span>{hourStr}</span>
+                  <span className="font-mono-numbers">{hourStr}</span>
                   {isCurrentHour && (
-                    <span className="block text-[9px] tracking-wider text-[#141410] font-bold uppercase leading-none mt-0.5">
+                    <span className="block text-[9px] tracking-wider text-[#141410] font-bold uppercase leading-none mt-1">
                       AGORA
                     </span>
                   )}
                 </div>
 
-                {/* 2. Journey Waypoint Node (Connected along the path) */}
-                <div className="relative z-10 flex items-center justify-center shrink-0 w-6 pt-1">
-                  {hasActivities ? (
-                    /* Active Hour Waypoint Node */
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (hourActivities.length === 1) {
-                          onOpenDetail(hourActivities[0]);
-                        }
-                      }}
-                      className={`rounded-full transition-all flex items-center justify-center cursor-pointer ${
-                        allCompletedInHour
-                          ? 'w-6 h-6 bg-[#141410] border border-[#141410] text-[#EDE8D0] shadow-[0_2px_8px_rgba(20,20,16,0.2)]'
-                          : isCurrentHour
-                          ? 'w-6 h-6 bg-[#FAF8F0] border-2 border-[#141410] text-[#141410] ring-4 ring-[#C4C0AB]'
-                          : hasNextActivity
-                          ? 'w-6 h-6 bg-[#FAF8F0] border-2 border-[#141410] text-[#141410] ring-2 ring-[#141410]/30'
-                          : someCompleted
-                          ? 'w-5 h-5 bg-[#545248] border border-[#33312B] text-[#EDE8D0]'
-                          : 'w-5 h-5 bg-[#FAF8F0] border-2 border-[#777567] hover:border-[#141410]'
+                {/* 2. Journey Waypoint Node (Substantial Gamified Milestone + Connected Spine Trail) */}
+                <div
+                  className={`relative w-14 sm:w-16 shrink-0 flex items-center justify-center self-stretch ${
+                    hasActivities && hourActivities.length > 1 ? 'pt-1.5' : ''
+                  }`}
+                >
+                  {/* Vertical Spine Trail (Segment precisely centered behind the milestone) */}
+                  <div
+                    className={`absolute left-1/2 -translate-x-1/2 w-[3px] bg-[#C4C0AB] ${
+                      hour === 0 ? 'top-1/2 rounded-t-full' : 'top-0'
+                    } ${hour === 23 ? 'bottom-1/2 rounded-b-full' : 'bottom-0'}`}
+                    aria-hidden="true"
+                  />
+
+                  {/* Active progress trail along the spine for Today up to current hour */}
+                  {isToday && hour <= currentHour && (
+                    <div
+                      className={`absolute left-1/2 -translate-x-1/2 w-[3px] bg-[#141410] ${
+                        hour === 0 ? 'top-1/2 rounded-t-full' : 'top-0'
+                      } ${
+                        hour === currentHour ? 'bottom-1/2' : 'bottom-0'
                       }`}
-                      title={`${hourActivities.length} atividade(s) às ${hourStr}`}
-                      aria-label={`${hourActivities.length} atividade(s) às ${hourStr}`}
-                    >
-                      {allCompletedInHour ? (
-                        <Check className="w-3.5 h-3.5 stroke-[3]" />
-                      ) : isCurrentHour ? (
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#141410]" />
-                      ) : hasNextActivity ? (
-                        <span className="w-2 h-2 rounded-full bg-[#141410]" />
-                      ) : (
-                        <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
-                      )}
-                    </button>
+                      aria-hidden="true"
+                    />
+                  )}
+
+                  {hasActivities ? (
+                    (() => {
+                      const primaryActivity =
+                        hourActivities.find((a) => !a.completed) || hourActivities[0];
+                      const primaryIcon: RpgIconId =
+                        primaryActivity.icon ||
+                        inferRpgIcon(primaryActivity.title, primaryActivity.category);
+
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (hourActivities.length === 1) {
+                              onOpenDetail(hourActivities[0]);
+                            }
+                          }}
+                          className={`rounded-full transition-all flex items-center justify-center cursor-pointer relative z-10 select-none ${
+                            allCompletedInHour
+                              ? 'w-13.5 h-13.5 sm:w-14 sm:h-14 bg-[#141410] border border-[#141410] shadow-xs active:scale-95'
+                              : isCurrentHour
+                              ? 'w-16 h-16 sm:w-[68px] sm:h-[68px] bg-[#FAF8F0] border-2 border-[#141410] ring-2 ring-[#141410] ring-offset-2 ring-offset-[#EDE8D0] shadow-xs active:scale-95'
+                              : hasNextActivity
+                              ? 'w-14 h-14 sm:w-15 sm:h-15 bg-[#FAF8F0] border-2 border-[#141410] ring-2 ring-[#141410]/20 ring-offset-1 ring-offset-[#EDE8D0] shadow-xs active:scale-95'
+                              : someCompleted
+                              ? 'w-13.5 h-13.5 sm:w-14 sm:h-14 bg-[#545248] border border-[#33312B] shadow-xs active:scale-95'
+                              : 'w-13.5 h-13.5 sm:w-14 sm:h-14 bg-[#FAF8F0] border border-[#C4C0AB] hover:border-[#141410] shadow-xs active:scale-95'
+                          }`}
+                          title={`${hourActivities.length} atividade(s) às ${hourStr}`}
+                          aria-label={`${hourActivities.length} atividade(s) às ${hourStr}`}
+                        >
+                          {/* RPG Pixel-art item icon */}
+                          <RpgIcon
+                            icon={primaryIcon}
+                            size={isCurrentHour ? 28 : hasNextActivity ? 25 : 23}
+                            variant={
+                              allCompletedInHour || someCompleted
+                                ? 'completed'
+                                : isPastHour
+                                ? 'muted'
+                                : 'default'
+                            }
+                          />
+
+                          {/* Discrete check badge at bottom-right corner when completed */}
+                          {allCompletedInHour && (
+                            <span
+                              className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-[#FAF8F0] border border-[#141410] text-[#141410] flex items-center justify-center shadow-xs"
+                              title="Etapa concluída"
+                            >
+                              <Check className="w-2.5 h-2.5 stroke-[3.5]" />
+                            </span>
+                          )}
+
+                          {/* Multiple activities counter badge at top-right */}
+                          {hourActivities.length > 1 && (
+                            <span
+                              className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-[#141410] text-[#EDE8D0] text-[9px] font-mono font-bold leading-none border border-[#FAF8F0] shadow-xs"
+                              title={`${hourActivities.length} atividades neste horário`}
+                            >
+                              +{hourActivities.length - 1}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })()
                   ) : (
-                    /* Empty Hour Node (Hollow journey marker ○, click to add) */
+                    /* Empty Hour Node (Inviting Architectural Waypoint, touch to add) */
                     <button
                       type="button"
                       onClick={() => onNewActivity(undefined, hourStr)}
                       title={`Adicionar atividade às ${hourStr}`}
-                      className={`w-3.5 h-3.5 rounded-full border bg-[#EDE8D0] transition-colors cursor-pointer group flex items-center justify-center ${
+                      className={`rounded-full transition-all cursor-pointer group flex items-center justify-center relative z-10 ${
                         isCurrentHour
-                          ? 'border-[#141410] bg-[#C4C0AB] ring-2 ring-[#141410]/20'
-                          : 'border-[#9D9988] hover:border-[#141410] hover:bg-[#C4C0AB]'
+                          ? 'w-11 h-11 sm:w-12 sm:h-12 border-2 border-[#141410] bg-[#FAF8F0] ring-2 ring-[#141410] ring-offset-2 ring-offset-[#EDE8D0] shadow-xs active:scale-95'
+                          : 'w-9.5 h-9.5 sm:w-10 sm:h-10 border border-[#C4C0AB] bg-[#FAF8F0]/70 hover:border-[#141410] hover:bg-[#FAF8F0] shadow-xs active:scale-95'
                       }`}
                       aria-label={`Adicionar atividade às ${hourStr}`}
                     >
-                      <span className="w-1 h-1 rounded-full bg-transparent group-hover:bg-[#141410] transition-colors" />
+                      {isCurrentHour ? (
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#141410] animate-pulse" />
+                      ) : (
+                        <div className="flex items-center justify-center">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#C4C0AB] group-hover:hidden transition-colors" />
+                          <Plus className="w-3.5 h-3.5 stroke-[2.5] hidden group-hover:block text-[#141410] transition-transform group-hover:scale-110" />
+                        </div>
+                      )}
                     </button>
                   )}
                 </div>
 
                 {/* 3. Right Content: Compact Journey Steps (Passos do Dia) */}
-                <div className="flex-1 min-w-0 min-h-[36px] sm:min-h-[40px] flex flex-col justify-center">
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
                   {hasActivities ? (
-                    <div className="space-y-1.5 w-full">
+                    <div className="space-y-2 w-full">
                       {hourActivities.map((act) => {
                         const isCompleted = act.completed;
                         const isNext = act.id === nextActivityId && !isCompleted;
+                        const actIcon: RpgIconId =
+                          act.icon || inferRpgIcon(act.title, act.category);
 
                         return (
                           <motion.div
                             key={act.id}
                             layout
                             onClick={() => onOpenDetail(act)}
-                            className={`group w-full py-2 px-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 ${
+                            className={`group w-full py-2.5 px-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 ${
                               isCompleted
                                 ? 'bg-[#FAF8F0]/70 border-[#C4C0AB] text-[#777567] hover:border-[#9D9988]'
                                 : isNext
-                                ? 'bg-[#FAF8F0] border-2 border-[#141410] shadow-[0_2px_12px_rgba(20,20,16,0.06)] text-[#141410]'
+                                ? 'bg-[#FAF8F0] border-2 border-[#141410] shadow-[0_2px_8px_rgba(20,20,16,0.06)] text-[#141410]'
                                 : isCurrentHour
-                                ? 'bg-[#FAF8F0] border border-[#141410] text-[#141410] shadow-sm'
+                                ? 'bg-[#FAF8F0] border border-[#141410] text-[#141410] shadow-xs'
                                 : 'bg-[#FAF8F0] border border-[#C4C0AB] hover:border-[#9D9988] text-[#33312B]'
                             }`}
                           >
-                            {/* Checkmark button + Title */}
+                            {/* Checkmark button + RPG Icon + Title */}
                             <div className="flex items-center gap-2.5 min-w-0 flex-1">
                               <button
                                 type="button"
@@ -243,9 +298,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                                     ? 'Reabrir atividade'
                                     : 'Concluir atividade'
                                 }
-                                className={`w-5 h-5 rounded-md flex items-center justify-center transition-colors shrink-0 cursor-pointer ${
+                                className={`w-5.5 h-5.5 rounded-lg flex items-center justify-center transition-all shrink-0 cursor-pointer ${
                                   isCompleted
-                                    ? 'bg-[#141410] text-[#EDE8D0] shadow-sm'
+                                    ? 'bg-[#141410] text-[#EDE8D0] shadow-xs'
                                     : isNext
                                     ? 'border-2 border-[#141410] text-[#141410] bg-[#C4C0AB]/40 hover:bg-[#141410] hover:text-[#EDE8D0]'
                                     : 'border border-[#9D9988] text-transparent hover:border-[#141410] hover:text-[#141410]'
@@ -261,6 +316,15 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                                 )}
                               </button>
 
+                              {/* Subtle RPG Item Icon inside the activity card */}
+                              <div className="shrink-0 flex items-center justify-center">
+                                <RpgIcon
+                                  icon={actIcon}
+                                  size={18}
+                                  variant={isCompleted ? 'muted' : 'default'}
+                                />
+                              </div>
+
                               <div className="flex items-center gap-2 min-w-0 flex-1">
                                 <span
                                   className={`text-xs sm:text-sm font-semibold truncate ${
@@ -275,7 +339,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                                 </span>
 
                                 {isNext && (
-                                  <span className="hidden xs:inline-flex items-center text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#141410] text-[#EDE8D0] border border-[#141410] font-bold shrink-0">
+                                  <span className="hidden xs:inline-flex items-center text-[9px] font-mono px-2 py-0.5 rounded-full bg-[#141410] text-[#EDE8D0] border border-[#141410] font-bold shrink-0 shadow-xs">
                                     PRÓXIMO
                                   </span>
                                 )}
@@ -283,7 +347,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                             </div>
 
                             {/* Exact Time & Optional Category */}
-                            <div className="flex items-center gap-1.5 shrink-0 text-[11px] font-mono">
+                            <div className="flex items-center gap-1.5 shrink-0 text-[11px] font-mono font-mono-numbers">
                               <span
                                 className={`${
                                   isNext || isCurrentHour
@@ -311,14 +375,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                     /* Empty Hour: clean, calm, click to schedule */
                     <div
                       onClick={() => onNewActivity(undefined, hourStr)}
-                      className="w-full py-1 px-2 rounded-lg hover:bg-[#C4C0AB]/30 transition-colors cursor-pointer group flex items-center justify-between"
+                      className="w-full py-2 px-2.5 rounded-xl hover:bg-[#C4C0AB]/30 transition-colors cursor-pointer group flex items-center justify-between"
                     >
-                      <span className="text-[11px] font-mono text-transparent group-hover:text-[#777567] transition-colors flex items-center gap-1">
-                        <Plus className="w-3 h-3 text-[#545248]" />
+                      <span className="text-[11px] font-mono text-transparent group-hover:text-[#777567] transition-colors flex items-center gap-1.5">
+                        <Plus className="w-3.5 h-3.5 text-[#545248]" />
                         <span>Adicionar às {hourStr}</span>
                       </span>
 
-                      <span className="text-[10px] font-mono text-[#9D9988] opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-[11px] font-mono text-[#9D9988] opacity-0 group-hover:opacity-100 transition-opacity">
                         +
                       </span>
                     </div>

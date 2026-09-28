@@ -14,28 +14,28 @@ export const Header: React.FC<HeaderProps> = ({
   onViewChange,
 }) => {
   return (
-    <div className="w-full border-b border-[#C4C0AB]/60 select-none">
+    <div className="w-full border-b border-[#C4C0AB]/70 select-none bg-[#EDE8D0]">
       <div className="w-full max-w-lg mx-auto px-3 sm:px-4 py-2 sm:py-2.5">
-        {/* Main Tab Navigation: Distributed across full width with equal touch areas */}
+        {/* Main Tab Navigation: Distributed across full width with equal, generous touch areas */}
         <nav
-          className="w-full grid grid-cols-3 gap-2 sm:gap-3 items-center"
-          aria-label="Modo de visualização"
+          className="w-full grid grid-cols-3 gap-2.5 sm:gap-3 items-center"
+          aria-label="Navegação Principal"
         >
           {/* Tab 1: Timeline (24h) */}
           <button
             type="button"
             onClick={() => onViewChange('timeline')}
-            title="Timeline (24h)"
+            title="Timeline / Jornada do Dia"
             aria-label="Timeline 24 horas"
-            className={`w-full h-11 sm:h-12 flex flex-col items-center justify-center rounded-2xl cursor-pointer relative group transition-colors ${
+            className={`w-full h-12 sm:h-13 flex flex-col items-center justify-center rounded-2xl cursor-pointer relative group transition-all duration-150 active:scale-[0.98] ${
               currentView === 'timeline'
-                ? 'bg-[#141410] text-[#EDE8D0] border border-[#141410] shadow-[0_2px_8px_rgba(20,20,16,0.14)]'
-                : 'text-[#777567] hover:text-[#141410] hover:bg-[#C4C0AB]/40 border border-transparent'
+                ? 'bg-[#141410] text-[#EDE8D0] border-2 border-[#141410] shadow-[0_2px_8px_rgba(20,20,16,0.18)]'
+                : 'text-[#545248] hover:text-[#141410] hover:bg-[#C4C0AB]/50 border-2 border-transparent'
             }`}
           >
             <GitCommitVertical
-              className={`w-5 h-5 ${
-                currentView === 'timeline' ? 'stroke-[2.3] text-[#EDE8D0]' : 'stroke-[2]'
+              className={`w-5.5 h-5.5 sm:w-6 sm:h-6 crisp-nav-icon ${
+                currentView === 'timeline' ? 'stroke-[2.4] text-[#EDE8D0]' : 'stroke-[2]'
               }`}
             />
             {currentView === 'timeline' && (
@@ -47,17 +47,17 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={() => onViewChange('checklist')}
-            title="Checklist"
+            title="Checklist de Atividades"
             aria-label="Checklist de atividades"
-            className={`w-full h-11 sm:h-12 flex flex-col items-center justify-center rounded-2xl cursor-pointer relative group transition-colors ${
+            className={`w-full h-12 sm:h-13 flex flex-col items-center justify-center rounded-2xl cursor-pointer relative group transition-all duration-150 active:scale-[0.98] ${
               currentView === 'checklist'
-                ? 'bg-[#141410] text-[#EDE8D0] border border-[#141410] shadow-[0_2px_8px_rgba(20,20,16,0.14)]'
-                : 'text-[#777567] hover:text-[#141410] hover:bg-[#C4C0AB]/40 border border-transparent'
+                ? 'bg-[#141410] text-[#EDE8D0] border-2 border-[#141410] shadow-[0_2px_8px_rgba(20,20,16,0.18)]'
+                : 'text-[#545248] hover:text-[#141410] hover:bg-[#C4C0AB]/50 border-2 border-transparent'
             }`}
           >
             <CheckSquare
-              className={`w-5 h-5 ${
-                currentView === 'checklist' ? 'stroke-[2.3] text-[#EDE8D0]' : 'stroke-[2]'
+              className={`w-5.5 h-5.5 sm:w-6 sm:h-6 crisp-nav-icon ${
+                currentView === 'checklist' ? 'stroke-[2.4] text-[#EDE8D0]' : 'stroke-[2]'
               }`}
             />
             {currentView === 'checklist' && (
@@ -71,15 +71,15 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => onViewChange('calendar')}
             title="Grade Diária"
             aria-label="Grade diária"
-            className={`w-full h-11 sm:h-12 flex flex-col items-center justify-center rounded-2xl cursor-pointer relative group transition-colors ${
+            className={`w-full h-12 sm:h-13 flex flex-col items-center justify-center rounded-2xl cursor-pointer relative group transition-all duration-150 active:scale-[0.98] ${
               currentView === 'calendar'
-                ? 'bg-[#141410] text-[#EDE8D0] border border-[#141410] shadow-[0_2px_8px_rgba(20,20,16,0.14)]'
-                : 'text-[#777567] hover:text-[#141410] hover:bg-[#C4C0AB]/40 border border-transparent'
+                ? 'bg-[#141410] text-[#EDE8D0] border-2 border-[#141410] shadow-[0_2px_8px_rgba(20,20,16,0.18)]'
+                : 'text-[#545248] hover:text-[#141410] hover:bg-[#C4C0AB]/50 border-2 border-transparent'
             }`}
           >
             <CalendarDays
-              className={`w-5 h-5 ${
-                currentView === 'calendar' ? 'stroke-[2.3] text-[#EDE8D0]' : 'stroke-[2]'
+              className={`w-5.5 h-5.5 sm:w-6 sm:h-6 crisp-nav-icon ${
+                currentView === 'calendar' ? 'stroke-[2.4] text-[#EDE8D0]' : 'stroke-[2]'
               }`}
             />
             {currentView === 'calendar' && (

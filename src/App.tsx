@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Activity, ViewMode, DayOffset } from './types';
 import { DEMO_SAMPLE_ACTIVITIES } from './data/mockActivities';
 import {
@@ -72,10 +72,66 @@ export default function App() {
     if (next) playTickSound();
   }, [soundActive]);
 
-  // Real dynamic calendar day info
+  // Dynamic calendar day info
   const currentDayInfo = useMemo(() => {
     return getDynamicDayInfo(currentOffset);
   }, [currentOffset]);
+
+  // Date Navigation Actions (with audio feedback)
+  const handlePrevDay = useCallback(() => {
+    playTickSound();
+    setCurrentOffset((prev) => (prev - 1) as DayOffset);
+  }, []);
+
+  const handleNextDay = useCallback(() => {
+    playTickSound();
+    setCurrentOffset((prev) => (prev + 1) as DayOffset);
+  }, []);
+
+  const handleToday = useCallback(() => {
+    playTickSound();
+    setCurrentOffset(0);
+    setCenterKey((prev) => prev + 1);
+  }, []);
+
+  // Horizontal Swipe Navigation between dates
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        time: Date.now(),
+      };
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current || e.changedTouches.length === 0) return;
+    const start = touchStartRef.current;
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - start.x;
+    const deltaY = touch.clientY - start.y;
+    const elapsed = Date.now() - start.time;
+    touchStartRef.current = null;
+
+    // Detect horizontal swipe gesture:
+    // Distance > 45px, predominantly horizontal (|deltaX| > |deltaY| * 1.3), completed within 650ms
+    if (
+      Math.abs(deltaX) > 45 &&
+      Math.abs(deltaX) > Math.abs(deltaY) * 1.3 &&
+      elapsed < 650
+    ) {
+      if (deltaX < 0) {
+        // Swiped Left -> advance to next day
+        handleNextDay();
+      } else {
+        // Swiped Right -> return to previous day
+        handlePrevDay();
+      }
+    }
+  }, [handleNextDay, handlePrevDay]);
 
   // Activities sorted by time for the active day
   const currentActivities = useMemo(() => {
@@ -190,6 +246,7 @@ export default function App() {
       endTime?: string;
       description?: string;
       category?: string;
+      icon?: import('./types').RpgIconId;
     }) => {
       playTickSound();
 
@@ -224,6 +281,7 @@ export default function App() {
                 endTime: data.endTime,
                 description: data.description,
                 category: data.category,
+                icon: data.icon || item.icon,
                 duration,
               };
             }
@@ -239,6 +297,7 @@ export default function App() {
             endTime: data.endTime,
             description: data.description,
             category: data.category || 'Rotina',
+            icon: data.icon,
             completed: false,
             duration,
           };
@@ -318,26 +377,41 @@ export default function App() {
       if (e.key === '1') setCurrentView('timeline');
       if (e.key === '2') setCurrentView('checklist');
       if (e.key === '3') setCurrentView('calendar');
+
+      // ArrowLeft / ArrowRight: navigate days
+      if (e.key === 'ArrowLeft' && !isFormOpen && !selectedActivity) {
+        e.preventDefault();
+        handlePrevDay();
+      }
+      if (e.key === 'ArrowRight' && !isFormOpen && !selectedActivity) {
+        e.preventDefault();
+        handleNextDay();
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [nextActivity, isFormOpen, selectedActivity, handleToggleComplete, handleOpenNewActivity]);
+  }, [
+    nextActivity,
+    isFormOpen,
+    selectedActivity,
+    handleToggleComplete,
+    handleOpenNewActivity,
+    handlePrevDay,
+    handleNextDay,
+  ]);
 
   return (
     <div className="w-full h-full h-[100dvh] max-w-full overflow-hidden bg-[#EDE8D0] text-[#141410] flex flex-col font-sans selection:bg-[#33312B] selection:text-[#EDE8D0]">
-      {/* ÁREA 1 — INTERFACE FIXA (Área segura do iOS + Toolbar + DaySelector) */}
-      <header className="shrink-0 w-full z-30 bg-[#EDE8D0] border-b border-[#C4C0AB] shadow-[0_2px_12px_rgba(20,20,16,0.04)] select-none">
-        {/* Área segura do iOS (Dynamic Island / Notch / Status Bar) */}
-        <div
-          className="w-full shrink-0 bg-[#EDE8D0]"
-          style={{
-            height: 'env(safe-area-inset-top, 0px)',
-            minHeight: 'env(safe-area-inset-top, 0px)',
-          }}
-          aria-hidden="true"
-        />
-
+      {/* ÁREA 1 — INTERFACE FIXA (Área segura do iOS / Dynamic Island + Respiro Generoso + Toolbar + DaySelector) */}
+      <header
+        className="shrink-0 w-full z-30 bg-[#EDE8D0] border-b border-[#C4C0AB] shadow-[0_2px_12px_rgba(20,20,16,0.04)] select-none ios-standalone-header transition-all duration-150"
+        style={{
+          paddingTop: pwa.isStandalone
+            ? 'calc(max(env(safe-area-inset-top, 50px), 50px) + 18px)'
+            : 'max(env(safe-area-inset-top, 0px), 8px)',
+        }}
+      >
         <Header
           currentView={currentView}
           onViewChange={(v) => {
@@ -350,24 +424,18 @@ export default function App() {
         <DaySelector
           currentOffset={currentOffset}
           dayInfo={currentDayInfo}
-          onPrevDay={() => {
-            playTickSound();
-            setCurrentOffset((prev) => prev - 1);
-          }}
-          onNextDay={() => {
-            playTickSound();
-            setCurrentOffset((prev) => prev + 1);
-          }}
-          onToday={() => {
-            playTickSound();
-            setCurrentOffset(0);
-            setCenterKey((prev) => prev + 1);
-          }}
+          onPrevDay={handlePrevDay}
+          onNextDay={handleNextDay}
+          onToday={handleToday}
         />
       </header>
 
-      {/* ÁREA 2 — TIMELINE / VISTAS COM SCROLL INTERNO INDEPENDENTE */}
-      <main className="w-full flex-1 min-h-0 overflow-hidden relative flex flex-col">
+      {/* ÁREA 2 — TIMELINE / VISTAS COM SCROLL INTERNO INDEPENDENTE + NAVEGAÇÃO POR SWIPE */}
+      <main
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className="w-full flex-1 min-h-0 overflow-hidden relative flex flex-col touch-pan-y"
+      >
         {/* Timeline View - 24 Hours with Independent Smooth Scroll */}
         {currentView === 'timeline' && (
           <TimelineView

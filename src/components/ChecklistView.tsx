@@ -2,6 +2,7 @@ import React from 'react';
 import { Activity } from '../types';
 import { Check, ChevronRight, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
+import { RpgIcon, inferRpgIcon } from './RpgIcon';
 
 interface ChecklistViewProps {
   activities: Activity[];
