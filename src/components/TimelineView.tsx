@@ -270,9 +270,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                       className="group w-14 h-14 sm:w-15 sm:h-15 rounded-full bg-[#FAF8F0] border-2 border-[#141410] ring-2 ring-[#141410]/25 ring-offset-2 ring-offset-[#EDE8D0] shadow-xs cursor-pointer flex items-center justify-center relative z-10 transition-all duration-200 hover:scale-[1.06] hover:-translate-y-0.5 active:scale-[0.96] active:translate-y-0 select-none"
                       aria-label={`Horário selecionado (${hourStr}) — Toque para criar atividade`}
                     >
-                      {/* Official Dimo RPG Chromatic Sword Asset */}
+                      {/* Official Dimo RPG Chromatic Sword Asset (icone2 / icone4) */}
                       <img
-                        src="/icone4.png"
+                        src="/icone2.png"
                         alt="Dimo Espada"
                         width={32}
                         height={32}
@@ -280,16 +280,22 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                       />
                     </button>
                   ) : (
-                    /* Normal Unselected Empty Hour Waypoint (calm, clean, transitions to sword on click) */
+                    /* Normal Unselected Empty Hour Waypoint (calm, clean with subtle sword preview) */
                     <button
                       type="button"
                       onClick={() => handleEmptyHourClick(hour, hourStr)}
-                      title={`Selecionar ${hourStr} para adicionar atividade`}
+                      title={"Selecionar " + hourStr + " para adicionar atividade"}
                       className="w-9.5 h-9.5 sm:w-10 sm:h-10 rounded-full border border-[#C4C0AB] bg-[#FAF8F0]/70 hover:border-[#141410] hover:bg-[#FAF8F0] transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer group flex items-center justify-center relative z-10 select-none shadow-xs"
-                      aria-label={`Selecionar ${hourStr}`}
+                      aria-label={"Selecionar " + hourStr}
                     >
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#C4C0AB] group-hover:bg-[#141410] transition-colors" />
-                      <Plus className="w-3.5 h-3.5 stroke-[2.5] hidden group-hover:block text-[#141410] transition-transform group-hover:scale-110 absolute" />
+                      {/* RPG Sword Preview (icone4 / icone2) before creating task */}
+                      <img
+                        src="/icone4.png"
+                        alt=""
+                        width={20}
+                        height={20}
+                        className="w-4.5 h-4.5 object-contain pixel-crisp pointer-events-none opacity-40 group-hover:opacity-100 transition-all duration-200 group-hover:scale-110"
+                      />
                     </button>
                   )}
                 </div>

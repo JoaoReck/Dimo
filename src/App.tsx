@@ -405,7 +405,7 @@ export default function App() {
     <div className="w-full h-full h-[100dvh] max-w-full overflow-hidden bg-[#EDE8D0] text-[#141410] flex flex-col font-sans selection:bg-[#33312B] selection:text-[#EDE8D0]">
       {/* ÁREA 1 — INTERFACE FIXA (Área segura do iOS / Dynamic Island + Toolbar + DaySelector) */}
       <header
-        className="shrink-0 w-full z-30 bg-[#EDE8D0] border-b border-[#C4C0AB] shadow-[0_2px_12px_rgba(20,20,16,0.04)] select-none header-safe-area"
+        className={`shrink-0 w-full z-30 bg-[#EDE8D0] border-b border-[#C4C0AB] shadow-[0_2px_12px_rgba(20,20,16,0.04)] select-none header-safe-area ${pwa.isStandalone ? "pwa-standalone-header" : ""}`}
       >
         <Header
           currentView={currentView}
