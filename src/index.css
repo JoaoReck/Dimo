@@ -86,7 +86,7 @@
 
 header,
 .toolbar-container {
-  /* Adiciona o recuo necessário da Dynamic Island / Status Bar */
+  /* Adiciona o recuo estrito da Dynamic Island / Status Bar */
   padding-top: env(safe-area-inset-top, 0px);
   background-color: #EDE8D0;
   -webkit-font-smoothing: antialiased;
