@@ -76,11 +76,21 @@
   }
 }
 
-/* Standalone / Web App iOS Top Cushion ("Respiro Superior ~10%") */
-@media all and (display-mode: standalone) {
-  .ios-standalone-header {
-    padding-top: calc(env(safe-area-inset-top, 38px) + 4px) !important;
-  }
+/* Responsive iOS Safe Area for Header/Toolbar:
+ * - Toolbar background occupies the entire top region (behind Status Bar / Dynamic Island)
+ * - Content begins strictly below env(safe-area-inset-top)
+ * - Zero fixed margins/paddings or arbitrary percentages
+ * - Crisp Retina anti-aliasing without blur
+ */
+.header-safe-area {
+  padding-top: env(safe-area-inset-top, 0px);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* Sharp vector rendering & smooth subpixel anti-aliasing */
