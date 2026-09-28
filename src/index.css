@@ -78,30 +78,41 @@
   }
 }
 
-/* Header Safe Area handling:
- * Normal Browser (Safari) and Standalone PWA:
- * Uses env(safe-area-inset-top) with solid background, zero subpixel blur or GPU compositing distortion.
- * In standalone PWA on iPhone (Dynamic Island / notch), env(safe-area-inset-top) resolves to ~54px-59px.
- * We add a small, crisp 4px breathing room (env(safe-area-inset-top) + 4px) in standalone mode to guarantee
- * comfortable clearance without creating an excessive blank area.
- */
-.header-safe-area {
-  padding-top: env(safe-area-inset-top, 0px);
+/* ==========================================================================
+   ESTRUTURA LIMPA DE SAFE AREA DO iOS / PWA STANDALONE
+   Princípio:
+   - Safe Area = Espaço estrito do sistema (Dynamic Island / Status Bar)
+   - Toolbar = Altura visual normal e compacta
+   - Zero backdrop-filter, zero GPU transforms artificiais, zero subpixel blur
+   ========================================================================== */
+
+.ios-safe-area-top {
+  height: env(safe-area-inset-top, 0px);
+  width: 100%;
+  background-color: #EDE8D0;
+}
+
+.header-content-box {
+  background-color: #EDE8D0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
-/* Standalone PWA mode: Compact, tight clearance below Dynamic Island / status bar */
+/* Regra específica de pureza para modo Standalone PWA */
 @media (display-mode: standalone) {
-  .header-safe-area {
-    padding-top: calc(env(safe-area-inset-top, 0px) + 4px);
+  .ios-safe-area-top {
+    height: env(safe-area-inset-top, 0px);
   }
-}
-
-/* Fallback for iOS Standalone class */
-.pwa-standalone-header {
-  padding-top: calc(env(safe-area-inset-top, 0px) + 4px) !important;
+  
+  header,
+  .header-content-box,
+  .toolbar-container {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
+    background: #EDE8D0 !important;
+  }
 }
 
 /* Sharp vector rendering & smooth subpixel anti-aliasing */
