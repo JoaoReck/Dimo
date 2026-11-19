@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+
+  --color-brand-50: #eaf2ff;
+  --color-brand-100: #d3e4fd;
+  --color-brand-400: #4c8df6;
+  --color-brand-500: #1a73e8;
+  --color-brand-600: #1560c4;
+  --color-brand-700: #124fa0;
+
+  --color-accent-100: #ffe8d6;
+  --color-accent-400: #ff9d5c;
+  --color-accent-500: #ff8a3d;
+  --color-accent-600: #f0731f;
+
+  --color-study: #1a73e8;
+  --color-english: #12b76a;
+  --color-script: #9b51e0;
+  --color-inbox: #ff8a3d;
+  --color-habit: #e8318a;
+
+  --color-surface: #ffffff;
+  --color-canvas: #f4f8ff;
+  --color-ink: #0f1722;
+  --color-muted: #5b6b82;
+  --color-line: #e3eaf5;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(60rem 30rem at 85% -10%, rgb(26 115 232 / 0.10), transparent 60%),
+    radial-gradient(40rem 25rem at -10% 110%, rgb(255 138 61 / 0.10), transparent 60%);
+  background-attachment: fixed;
+}
+
+::selection { background: var(--color-brand-100); }
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 1.5rem;
+  box-shadow: 0 1px 2px rgb(15 23 34 / 0.04), 0 8px 24px -12px rgb(26 115 232 / 0.12);
+}
+
+.input {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1.5px solid var(--color-line);
+  background: #fff;
+  padding: 0.75rem 1rem;
+  font: inherit;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.input:focus {
+  border-color: var(--color-brand-500);
+  box-shadow: 0 0 0 4px rgb(26 115 232 / 0.12);
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  border-radius: 9999px; padding: .65rem 1.25rem; font-weight: 700; cursor: pointer;
+  border: 0; transition: transform .12s, box-shadow .15s, background .15s;
+}
+.btn:active { transform: scale(.97); }
+.btn-primary { background: var(--color-brand-500); color: #fff; box-shadow: 0 8px 20px -8px rgb(26 115 232 / .6); }
+.btn-primary:hover { background: var(--color-brand-600); }
+.btn-accent { background: var(--color-accent-500); color: #fff; box-shadow: 0 8px 20px -8px rgb(255 138 61 / .7); }
+.btn-accent:hover { background: var(--color-accent-600); }
+.btn-ghost { background: transparent; color: var(--color-muted); }
+.btn-ghost:hover { background: var(--color-brand-50); color: var(--color-brand-600); }
+
+.safe-bottom { padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
